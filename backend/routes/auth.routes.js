@@ -21,4 +21,13 @@ router.get('/me', authenticate, AuthController.getProfile);
 
 router.get('/countries', AuthController.getCountries);
 
+router.put('/change-password', authenticate, [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters'),
+], AuthController.changePassword);
+
+router.put('/update-profile', authenticate, [
+  body('name').trim().notEmpty().withMessage('Name is required'),
+], AuthController.updateProfile);
+
 export default router;

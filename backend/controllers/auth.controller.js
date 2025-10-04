@@ -174,6 +174,71 @@ class AuthController {
       next(error);
     }
   }
+
+  async changePassword(req, res, next) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+
+      // Verify current password
+      const isValidPassword = await bcrypt.compare(currentPassword, req.user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: 'Current password is incorrect' });
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update password
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { password: hashedPassword }
+      });
+
+      // Send notification email
+      emailService.sendPasswordChangeNotification(req.user)
+        .catch(err => console.error('Failed to send password change notification:', err));
+
+      res.json({ message: 'Password changed successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateProfile(req, res, next) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { name } = req.body;
+
+      const updatedUser = await prisma.user.update({
+        where: { id: req.user.id },
+        data: { name },
+        include: { company: true, manager: true }
+      });
+
+      res.json({
+        message: 'Profile updated successfully',
+        user: {
+          id: updatedUser.id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          company: updatedUser.company,
+          manager: updatedUser.manager
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new AuthController();
