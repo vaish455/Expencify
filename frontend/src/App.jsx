@@ -10,6 +10,7 @@ import Signup from './pages/auth/Signup';
 import AdminDashboard from './pages/admin/Dashboard';
 import ManagerDashboard from './pages/manager/Dashboard';
 import EmployeeDashboard from './pages/employee/Dashboard';
+import ExecutiveDashboard from './pages/executive/Dashboard';
 
 // Admin Pages
 import UserManagement from './pages/admin/UserManagement';
@@ -47,6 +48,7 @@ function App() {
           <Route index element={
             user?.role === 'ADMIN' ? <AdminDashboard /> :
             user?.role === 'MANAGER' ? <ManagerDashboard /> :
+            ['CEO', 'CFO', 'CTO', 'DIRECTOR'].includes(user?.role) ? <ExecutiveDashboard /> :
             <EmployeeDashboard />
           } />
 
@@ -59,8 +61,8 @@ function App() {
           <Route path="submit-expense" element={<SubmitExpense />} />
           <Route path="my-expenses" element={<MyExpenses />} />
 
-          {/* Manager Routes */}
-          <Route path="pending-approvals" element={<ProtectedRoute role={['ADMIN', 'MANAGER']}><PendingApprovals /></ProtectedRoute>} />
+          {/* Manager & Executive Routes */}
+          <Route path="pending-approvals" element={<ProtectedRoute role={['ADMIN', 'MANAGER', 'CEO', 'CFO', 'CTO', 'DIRECTOR']}><PendingApprovals /></ProtectedRoute>} />
 
           {/* Shared Routes */}
           <Route path="expense/:id" element={<ExpenseDetails />} />
