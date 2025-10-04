@@ -21,13 +21,13 @@ class EmailService {
       subject: 'Welcome to Expencify!',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb;">Welcome to Expencify!</h2>
+          <h2 style="color: #714B67;">Welcome to Expencify!</h2>
           <p>Hi ${user.name},</p>
           <p>Your account has been successfully created as an <strong>${user.role}</strong> in <strong>${company.name}</strong>.</p>
           <p>You can now start managing your expenses efficiently.</p>
           <div style="margin: 30px 0;">
             <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" 
-               style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+               style="background-color: #714B67; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
               Login to Your Account
             </a>
           </div>
@@ -46,7 +46,7 @@ class EmailService {
       subject: 'Your Expencify Account Has Been Created',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb;">Your Expencify Account is Ready!</h2>
+          <h2 style="color: #714B67;">Your Expencify Account is Ready!</h2>
           <p>Hi ${user.name},</p>
           <p>${createdBy.name} has created an account for you in <strong>${company.name}</strong>.</p>
           <p>Your role: <strong>${user.role}</strong></p>
@@ -61,7 +61,7 @@ class EmailService {
           
           <div style="margin: 30px 0;">
             <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" 
-               style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+               style="background-color: #714B67; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
               Login Now
             </a>
           </div>
@@ -81,7 +81,7 @@ class EmailService {
       subject: 'New Login Detected',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb;">New Login Detected</h2>
+          <h2 style="color: #714B67;">New Login Detected</h2>
           <p>Hi ${user.name},</p>
           <p>We detected a new login to your account at ${new Date().toLocaleString()}.</p>
           <p>If this wasn't you, please contact your administrator immediately.</p>
@@ -100,7 +100,7 @@ class EmailService {
       subject: 'Password Changed Successfully',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb;">Password Changed</h2>
+          <h2 style="color: #714B67;">Password Changed</h2>
           <p>Hi ${user.name},</p>
           <p>Your password has been changed successfully at ${new Date().toLocaleString()}.</p>
           <p>If you didn't make this change, please contact your administrator immediately.</p>
@@ -119,7 +119,7 @@ class EmailService {
       subject: 'Expense Submitted Successfully',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb;">Expense Submitted</h2>
+          <h2 style="color: #714B67;">Expense Submitted</h2>
           <p>Hi ${user.name},</p>
           <p>Your expense has been submitted successfully and is pending approval.</p>
           
