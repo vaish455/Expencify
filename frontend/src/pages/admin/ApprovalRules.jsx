@@ -134,7 +134,7 @@ const ApprovalRules = () => {
         <h1 className="text-2xl font-bold text-gray-900">Approval Rules</h1>
         <button
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="btn-primary flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2 rounded-xl shadow-lg"
         >
           <Plus className="w-5 h-5" />
           <span>Add Approval Rule</span>
@@ -143,11 +143,11 @@ const ApprovalRules = () => {
 
       <div className="grid grid-cols-1 gap-4">
         {rules.map((rule) => (
-          <div key={rule.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+          <div key={rule.id} className="card p-6 hover:shadow-xl">
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-2">
-                  <CheckSquare className="w-6 h-6 text-primary" />
+                  <CheckSquare className="w-6 h-6" style={{ color: '#714B67' }} />
                   <h3 className="text-lg font-semibold text-gray-900">{rule.name}</h3>
                   <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
                     rule.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
@@ -173,10 +173,10 @@ const ApprovalRules = () => {
                   )}
                   
                   {rule.type === 'HYBRID' && (
-                    <div className="bg-blue-50 p-2 rounded">
-                      <p className="text-blue-800 font-medium">Hybrid Rule:</p>
-                      <p className="text-blue-700">• {rule.percentageRequired}% of approvers OR</p>
-                      <p className="text-blue-700">• {rule.specificApprover?.name} approves</p>
+                    <div className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, #E6F7F8 0%, #B3E5E8 50%)' }}>
+                      <p className="font-medium" style={{ color: '#017E84' }}>Hybrid Rule:</p>
+                      <p style={{ color: '#016369' }}>• {rule.percentageRequired}% of approvers OR</p>
+                      <p style={{ color: '#016369' }}>• {rule.specificApprover?.name} approves</p>
                     </div>
                   )}
                   
@@ -187,7 +187,7 @@ const ApprovalRules = () => {
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {rule.steps.map((step, index) => (
-                          <div key={step.id} className="flex items-center space-x-2 bg-gray-100 px-3 py-1 rounded-full">
+                          <div key={step.id} className="flex items-center space-x-2 px-3 py-1.5 rounded-full" style={{ backgroundColor: '#f5f3f4' }}>
                             {rule.type === 'SEQUENTIAL' && <span className="text-xs font-semibold text-gray-600">Step {index + 1}:</span>}
                             <span className="text-xs text-gray-800">{step.approver.name}</span>
                             <span className="text-xs text-gray-500">({step.approver.role})</span>
@@ -202,13 +202,13 @@ const ApprovalRules = () => {
               <div className="flex space-x-2">
                 <button
                   onClick={() => openEditModal(rule)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
                 >
                   <Edit className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => handleDelete(rule.id)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
@@ -219,9 +219,9 @@ const ApprovalRules = () => {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
-          <div className="bg-white rounded-lg p-8 max-w-2xl w-full m-4">
-            <h2 className="text-xl font-bold mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl">
+            <h2 className="text-2xl font-bold mb-6" style={{ color: '#714B67' }}>
               {editingRule ? 'Edit Approval Rule' : 'Add New Approval Rule'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -230,7 +230,7 @@ const ApprovalRules = () => {
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Standard Approval Flow"
@@ -240,7 +240,7 @@ const ApprovalRules = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Approval Type</label>
                 <select
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                 >
@@ -260,7 +260,7 @@ const ApprovalRules = () => {
                     type="number"
                     min="1"
                     max="100"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                     value={formData.percentageRequired}
                     onChange={(e) => setFormData({ ...formData, percentageRequired: parseInt(e.target.value) })}
                   />
@@ -273,7 +273,7 @@ const ApprovalRules = () => {
                     Specific Approver
                   </label>
                   <select
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                     value={formData.specificApproverId}
                     onChange={(e) => setFormData({ ...formData, specificApproverId: e.target.value })}
                   >
@@ -290,7 +290,7 @@ const ApprovalRules = () => {
                 <input
                   type="number"
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })}
                 />
@@ -327,7 +327,7 @@ const ApprovalRules = () => {
                       <span className="text-sm font-medium text-gray-600 w-16">Step {index + 1}</span>
                       <select
                         required
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                         value={step.approverId}
                         onChange={(e) => updateStep(index, e.target.value)}
                       >
@@ -355,14 +355,14 @@ const ApprovalRules = () => {
                 <button
                   type="button"
                   onClick={() => { setShowModal(false); resetForm(); }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary"
+                  className="btn-primary px-5 py-2.5 rounded-xl shadow-lg"
                 >
                   {loading ? 'Saving...' : editingRule ? 'Update' : 'Create'}
                 </button>

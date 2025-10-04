@@ -40,75 +40,140 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+        <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#714B67] to-[#017E84] bg-clip-text text-transparent mb-2">Admin Dashboard</h1>
+          <p className="text-gray-600 font-medium">Complete overview of your organization</p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm text-gray-500 font-medium">Last updated</p>
+          <p className="text-lg font-bold text-gray-900">{new Date().toLocaleDateString()}</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+          <div key={index} className="card p-6 hover:shadow-2xl stat-card group cursor-pointer" style={{ transition: 'all 0.3s ease' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex-1">
+                <p className="text-sm font-bold uppercase tracking-wider mb-2" style={{ color: '#8F8F8F' }}>{stat.label}</p>
+                <p className="text-4xl font-bold text-gray-900 mb-1">{stat.value}</p>
+                <div className="flex items-center space-x-1 text-xs font-semibold text-green-600">
+                  <span>↗</span>
+                  <span>+12% from last month</span>
+                </div>
               </div>
-              <div className="p-3 rounded-lg" style={{
-                backgroundColor: stat.color === 'blue' ? '#ebe7e9' :
-                                stat.color === 'purple' ? '#f3e8ff' :
-                                stat.color === 'yellow' ? '#fef3c7' :
-                                stat.color === 'green' ? '#d1fae5' :
-                                stat.color === 'red' ? '#fee2e2' : '#e0e7ff'
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{
+                background: stat.color === 'blue' ? 'linear-gradient(135deg, #E6F7F8 0%, #B3E5E8 100%)' :
+                            stat.color === 'purple' ? 'linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%)' :
+                            stat.color === 'yellow' ? 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)' :
+                            stat.color === 'green' ? 'linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%)' :
+                            stat.color === 'red' ? 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)' : 
+                            'linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%)'
               }}>
-                <stat.icon className="w-6 h-6" style={{
-                  color: stat.color === 'blue' ? '#714B67' :
-                         stat.color === 'purple' ? '#8b5cf6' :
-                         stat.color === 'yellow' ? '#d97706' :
+                <stat.icon className="w-10 h-10" style={{
+                  color: stat.color === 'blue' ? '#017E84' :
+                         stat.color === 'purple' ? '#8B5CF6' :
+                         stat.color === 'yellow' ? '#D97706' :
                          stat.color === 'green' ? '#059669' :
-                         stat.color === 'red' ? '#dc2626' : '#4f46e5'
+                         stat.color === 'red' ? '#DC2626' : '#6366F1'
                 }} />
               </div>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <div className="h-full rounded-full transition-all duration-1000" style={{
+                width: '75%',
+                background: stat.color === 'blue' ? 'linear-gradient(90deg, #017E84 0%, #00A09D 100%)' :
+                            stat.color === 'purple' ? 'linear-gradient(90deg, #8B5CF6 0%, #A78BFA 100%)' :
+                            stat.color === 'yellow' ? 'linear-gradient(90deg, #D97706 0%, #F59E0B 100%)' :
+                            stat.color === 'green' ? 'linear-gradient(90deg, #059669 0%, #10B981 100%)' :
+                            stat.color === 'red' ? 'linear-gradient(90deg, #DC2626 0%, #EF4444 100%)' : 
+                            'linear-gradient(90deg, #6366F1 0%, #818CF8 100%)'
+              }}></div>
             </div>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Expenses by Category</h2>
-          <div className="space-y-3">
+        <div className="card overflow-hidden">
+          <div className="p-6 border-b-2" style={{ 
+            background: 'linear-gradient(135deg, #F5F3F4 0%, #EBE7E9 100%)',
+            borderColor: '#714B67'
+          }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md" style={{ background: 'linear-gradient(135deg, #714B67 0%, #875A7B 100%)' }}>
+                  <FileText className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Expenses by Category</h2>
+                  <p className="text-sm text-gray-600">Breakdown of spending</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="p-6 space-y-4">
             {statistics?.expensesByCategory?.map((item, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <span className="text-gray-700">{item.category}</span>
+              <div key={index} className="flex justify-between items-center p-4 rounded-xl hover:shadow-md transition-all" style={{ backgroundColor: '#FAFAFA' }}>
                 <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-600">{item.count} expenses</span>
-                  <span className="font-semibold text-gray-900">${item.total?.toFixed(2)}</span>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm" style={{ background: 'linear-gradient(135deg, #E6F7F8 0%, #B3E5E8 100%)' }}>
+                    📊
+                  </div>
+                  <div>
+                    <span className="font-bold text-gray-900">{item.category}</span>
+                    <p className="text-sm text-gray-500 font-medium">{item.count} expenses</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="font-bold text-2xl" style={{ color: '#017E84' }}>${item.total?.toFixed(2)}</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Expenses</h2>
-          <div className="space-y-3">
+        <div className="card overflow-hidden">
+          <div className="p-6 border-b-2" style={{ 
+            background: 'linear-gradient(135deg, #E6F7F8 0%, #B3E5E8 100%)',
+            borderColor: '#017E84'
+          }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md" style={{ background: 'linear-gradient(135deg, #017E84 0%, #00A09D 100%)' }}>
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Recent Expenses</h2>
+                  <p className="text-sm text-gray-600">Latest submissions</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="p-6 space-y-3">
             {statistics?.recentExpenses?.slice(0, 5).map((expense) => (
               <Link
                 key={expense.id}
                 to={`/expense/${expense.id}`}
-                className="block p-3 hover:bg-gray-50 rounded-lg border border-gray-200"
+                className="block p-4 hover:shadow-lg rounded-xl border-2 transition-all"
+                style={{ borderColor: '#E5E5E5', backgroundColor: '#FAFAFA' }}
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium text-gray-900">{expense.description}</p>
-                    <p className="text-sm text-gray-600">{expense.user.name}</p>
+                <div className="flex justify-between items-center">
+                  <div className="flex-1">
+                    <p className="font-bold text-gray-900 mb-1">{expense.description}</p>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-600 font-medium">{expense.user.name}</span>
+                      <span className="text-gray-400">•</span>
+                      <span className="text-xs text-gray-500">{new Date(expense.createdAt).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900">${expense.amountInCompanyCurrency?.toFixed(2)}</p>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      expense.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                      expense.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
+                  <div className="text-right ml-4">
+                    <p className="font-bold text-xl" style={{ color: '#714B67' }}>${expense.amountInCompanyCurrency?.toFixed(2)}</p>
+                    <span className={`text-xs px-3 py-1.5 rounded-full font-bold ${
+                      expense.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                      expense.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                      'bg-yellow-100 text-yellow-700'
                     }`}>
                       {expense.status}
                     </span>

@@ -69,15 +69,15 @@ const Profile = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-8 text-white" style={{ background: 'linear-gradient(to right, #714B67, #5a3a52)' }}>
+      <div className="card overflow-hidden">
+        <div className="px-6 py-10 text-white gradient-mixed">
           <div className="flex items-center space-x-4">
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-              <User className="w-10 h-10" style={{ color: '#714B67' }} />
+            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
+              <User className="w-12 h-12" style={{ color: '#714B67' }} />
             </div>
             <div>
               <h1 className="text-2xl font-bold">{user?.name}</h1>
-              <p style={{ color: '#f5f3f4' }}>{user?.email}</p>
+              <p className="text-white opacity-90">{user?.email}</p>
               <div className="flex items-center space-x-2 mt-2">
                 <Shield className="w-4 h-4" />
                 <span className="text-sm font-medium">{user?.role}</span>
@@ -90,12 +90,11 @@ const Profile = () => {
           <nav className="flex space-x-8 px-6" aria-label="Tabs">
             <button
               onClick={() => setActiveTab('profile')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'profile'
-                  ? 'text-primary'
+                  ? 'text-primary border-primary'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
-              style={activeTab === 'profile' ? { borderColor: '#714B67' } : {}}
             >
               <User className="w-4 h-4 inline mr-2" />
               Profile Information
@@ -142,7 +141,7 @@ const Profile = () => {
                       <input
                         type="text"
                         required
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                         value={profileData.name}
                         onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
                       />
@@ -158,7 +157,7 @@ const Profile = () => {
                       <input
                         type="email"
                         disabled
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 cursor-not-allowed"
                         value={user?.email}
                       />
                     </div>
@@ -174,7 +173,7 @@ const Profile = () => {
                       <input
                         type="text"
                         disabled
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 cursor-not-allowed"
                         value={user?.role}
                       />
                     </div>
@@ -191,7 +190,7 @@ const Profile = () => {
                         <input
                           type="text"
                           disabled
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 cursor-not-allowed"
                           value={user.manager.name}
                         />
                       </div>
@@ -204,7 +203,7 @@ const Profile = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary flex items-center space-x-2"
+                  className="btn-primary flex items-center space-x-2 rounded-xl shadow-lg"
                 >
                   <Save className="w-4 h-4" />
                   <span>{loading ? 'Saving...' : 'Save Changes'}</span>
@@ -227,7 +226,7 @@ const Profile = () => {
                       <input
                         type="password"
                         required
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                         placeholder="••••••••"
                         value={passwordData.currentPassword}
                         onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
@@ -245,7 +244,7 @@ const Profile = () => {
                         type="password"
                         required
                         minLength={6}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                         placeholder="••••••••"
                         value={passwordData.newPassword}
                         onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
@@ -263,7 +262,7 @@ const Profile = () => {
                         type="password"
                         required
                         minLength={6}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                         placeholder="••••••••"
                         value={passwordData.confirmPassword}
                         onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
@@ -271,7 +270,7 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  <div className="border rounded-lg p-4" style={{ backgroundColor: '#f5f3f4', borderColor: '#ebe7e9' }}>
+                  <div className="card p-4" style={{ backgroundColor: '#f5f3f4', borderColor: '#ebe7e9' }}>
                     <p className="text-sm font-medium" style={{ color: '#5a3a52' }}>
                       Password Requirements:
                     </p>
@@ -287,7 +286,7 @@ const Profile = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="btn-primary flex items-center space-x-2"
+                  className="btn-primary flex items-center space-x-2 rounded-xl shadow-lg"
                 >
                   <Lock className="w-4 h-4" />
                   <span>{loading ? 'Changing...' : 'Change Password'}</span>
@@ -310,7 +309,7 @@ const Profile = () => {
                       <input
                         type="text"
                         disabled
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 cursor-not-allowed"
                         value={user?.company?.name || 'N/A'}
                       />
                     </div>
@@ -325,7 +324,7 @@ const Profile = () => {
                       <input
                         type="text"
                         disabled
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 cursor-not-allowed"
                         value={user?.company?.country || 'N/A'}
                       />
                     </div>
@@ -340,7 +339,7 @@ const Profile = () => {
                       <input
                         type="text"
                         disabled
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl bg-gray-50 cursor-not-allowed"
                         value={user?.company?.currency || 'N/A'}
                       />
                     </div>

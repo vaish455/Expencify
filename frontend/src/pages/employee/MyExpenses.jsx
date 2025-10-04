@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
-import { Search, Filter, Calendar, FileText } from 'lucide-react';
+import { Search, Filter, Calendar, FileText, PlusCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
 const MyExpenses = () => {
@@ -75,31 +75,34 @@ const MyExpenses = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">My Expenses</h1>
-        <Link
-          to="/submit-expense"
-          className="btn-primary"
-        >
-          Submit New Expense
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">My Expenses</h1>
+          <p className="text-gray-600 mt-1">Manage and track your expenses</p>
+        </div>
+        <Link to="/submit-expense" className="btn-primary">
+          <PlusCircle className="w-5 h-5 inline mr-2" />
+          New Expense
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      {/* Filters */}
+      <div className="card p-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search expenses..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
 
           <select
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+            className="px-4 py-3 border border-gray-300 rounded-xl"
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
           >
@@ -112,88 +115,72 @@ const MyExpenses = () => {
 
           <input
             type="date"
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+            className="px-4 py-3 border border-gray-300 rounded-xl"
             value={filters.startDate}
             onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-            placeholder="Start Date"
           />
 
           <input
             type="date"
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+            className="px-4 py-3 border border-gray-300 rounded-xl"
             value={filters.endDate}
             onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-            placeholder="End Date"
           />
         </div>
+      </div>
 
+      {/* Expenses Table */}
+      <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full">
+            <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="text-left">Description</th>
+                <th className="text-left">Category</th>
+                <th className="text-left">Amount</th>
+                <th className="text-left">Date</th>
+                <th className="text-left">Status</th>
+                <th className="text-left">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody>
               {filteredExpenses.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan="6" className="text-center py-12">
                     <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p>No expenses found</p>
+                    <p className="text-gray-600">No expenses found</p>
                   </td>
                 </tr>
               ) : (
                 filteredExpenses.map((expense) => (
-                  <tr key={expense.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{expense.description}</div>
+                  <tr key={expense.id}>
+                    <td className="font-medium text-gray-900">{expense.description}</td>
+                    <td className="text-gray-600">{expense.category.name}</td>
+                    <td className="font-semibold text-gray-900">
+                      ${expense.amount.toFixed(2)} {expense.currency}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{expense.category.name}</div>
+                    <td className="text-gray-600">
+                      {format(new Date(expense.expenseDate), 'MMM dd, yyyy')}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-semibold text-gray-900">
-                        ${expense.amount.toFixed(2)} {expense.currency}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {format(new Date(expense.expenseDate), 'MMM dd, yyyy')}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        expense.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                        expense.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                        expense.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
-                        'bg-yellow-100 text-yellow-800'
+                    <td>
+                      <span className={`px-3 py-1 inline-flex text-xs font-semibold rounded-full ${
+                        expense.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                        expense.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                        expense.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
+                        'bg-yellow-100 text-yellow-700'
                       }`}>
                         {expense.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td>
                       <Link
                         to={`/expense/${expense.id}`}
-                        className="text-primary hover:text-primary"
+                        className="font-medium transition-colors"
+                        style={{ color: '#5a3a52' }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#4a2f44'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = '#5a3a52'}
                       >
-                        View Details
+                        View
                       </Link>
                     </td>
                   </tr>

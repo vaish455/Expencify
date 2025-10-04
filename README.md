@@ -74,6 +74,14 @@ A comprehensive expense management system with role-based access control, multi-
 - **date-fns** for date formatting
 - **Axios** for API calls
 
+### Design System
+- **Primary Color**: #5a3a52 (Deep Mauve) - Odoo's signature color
+- **Primary Light**: #875A7B (Light Mauve)
+- **Secondary Color**: #017E84 (Teal) - Pantone 322C, RAL 5021
+- **Neutral Gray**: #8F8F8F - Pantone 877C, RAL 7042
+- **Modern gradient combinations** for enhanced visual appeal
+- **Soft shadows and rounded corners** for a professional Odoo-inspired look
+
 ### External APIs
 - RestCountries API (country/currency data)
 - ExchangeRate API (currency conversion)

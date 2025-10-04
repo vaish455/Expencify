@@ -56,8 +56,8 @@ const ExpenseDetails = () => {
         <span>Back</span>
       </button>
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
+      <div className="card overflow-hidden">
+        <div className="p-6 border-b" style={{ borderColor: '#E5E5E5' }}>
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">{expense.description}</h1>
@@ -163,15 +163,15 @@ const ExpenseDetails = () => {
             
             {/* Manager Approval Section */}
             {expense.user.isManagerApprover && (
-              <div className="mb-6 bg-purple-50 p-4 rounded-lg">
-                <h4 className="font-medium text-purple-900 mb-3 flex items-center">
+              <div className="mb-6 p-4 rounded-xl" style={{ background: 'linear-gradient(135deg, #E6F7F8 0%, #B3E5E8 50%)' }}>
+                <h4 className="font-medium mb-3 flex items-center" style={{ color: '#017E84' }}>
                   <User className="w-5 h-5 mr-2" />
                   Manager Approval
                 </h4>
                 {expense.approvalActions
                   .filter(action => action.stepIndex === -1)
                   .map(action => (
-                    <div key={action.id} className="flex items-start space-x-3 p-3 bg-white rounded-lg">
+                    <div key={action.id} className="flex items-start space-x-3 p-3 bg-white rounded-xl">
                       <div className={`p-2 rounded-full ${
                         action.status === 'APPROVED' ? 'bg-green-100' : 'bg-red-100'
                       }`}>
@@ -205,7 +205,7 @@ const ExpenseDetails = () => {
               {expense.approvalActions
                 .filter(action => action.stepIndex >= 0)
                 .map((action, index) => (
-                  <div key={action.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div key={action.id} className="flex items-start space-x-3 p-3 rounded-xl" style={{ backgroundColor: '#f5f3f4' }}>
                     <div className={`p-2 rounded-full ${
                       action.status === 'APPROVED' ? 'bg-green-100' :
                       action.status === 'REJECTED' ? 'bg-red-100' :
