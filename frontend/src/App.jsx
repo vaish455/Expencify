@@ -26,6 +26,7 @@ import PendingApprovals from './pages/manager/PendingApprovals';
 
 // Shared Pages
 import ExpenseDetails from './pages/shared/ExpenseDetails';
+import Profile from './pages/shared/Profile';
 
 // Layout
 import Layout from './components/Layout';
@@ -66,6 +67,7 @@ function App() {
 
           {/* Shared Routes */}
           <Route path="expense/:id" element={<ExpenseDetails />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" />} />

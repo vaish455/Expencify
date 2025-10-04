@@ -15,6 +15,7 @@ A comprehensive expense management system with role-based access control, multi-
 - Assign roles: Employee, Manager, Admin, CEO, CFO, CTO, Director
 - Define manager relationships and approval hierarchies
 - Configure manager approval requirements
+- **Profile & Settings**: Update profile information, change password, view company details
 
 ### 💰 Expense Management
 - Submit expenses with multiple currencies
@@ -204,6 +205,23 @@ Login existing user
 
 #### GET /api/auth/me
 Get current user profile (requires authentication)
+
+#### PUT /api/auth/change-password
+Change user password (requires authentication)
+```json
+{
+  "currentPassword": "oldpassword",
+  "newPassword": "newpassword"
+}
+```
+
+#### PUT /api/auth/update-profile
+Update user profile (requires authentication)
+```json
+{
+  "name": "Updated Name"
+}
+```
 
 #### GET /api/auth/countries
 Get list of all countries with currencies
