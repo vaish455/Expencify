@@ -59,19 +59,20 @@ class UserController {
 
       const users = await prisma.user.findMany({
         where,
-        include: {
-          manager: {
-            select: { id: true, name: true, email: true }
-          }
-        },
         select: {
           id: true,
           name: true,
           email: true,
           role: true,
           isManagerApprover: true,
-          manager: true,
-          createdAt: true
+          createdAt: true,
+          manager: {
+            select: { 
+              id: true, 
+              name: true, 
+              email: true 
+            }
+          }
         }
       });
 
