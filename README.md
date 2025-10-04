@@ -5,12 +5,14 @@ A comprehensive expense management system with role-based access control, multi-
 ## Features
 
 ### 🔐 Authentication & Authorization
+
 - JWT-based authentication
 - Role-based access control (Admin, Manager, Employee, CEO, CFO, CTO, Director)
 - Automatic company creation on signup
 - Country-based currency selection
 
 ### 👥 User Management
+
 - Create and manage employees, managers, and executives
 - Assign roles: Employee, Manager, Admin, CEO, CFO, CTO, Director
 - Define manager relationships and approval hierarchies
@@ -18,6 +20,7 @@ A comprehensive expense management system with role-based access control, multi-
 - **Profile & Settings**: Update profile information, change password, view company details
 
 ### 💰 Expense Management
+
 - Submit expenses with multiple currencies
 - Automatic currency conversion
 - Receipt upload with Cloudinary integration
@@ -25,6 +28,7 @@ A comprehensive expense management system with role-based access control, multi-
 - Track expense status (Pending, In Progress, Approved, Rejected)
 
 ### ✅ Approval Workflows
+
 - **Manager Priority**: Manager must approve first if `isManagerApprover` is enabled
 - **Sequential Approval**: Step-by-step approval chain with defined sequence (e.g., Manager → CFO → CEO)
 - **Percentage-based**: Approve when X% of approvers agree
@@ -38,6 +42,7 @@ A comprehensive expense management system with role-based access control, multi-
 - **Multi-Role Support**: All executive roles can approve expenses assigned to them in workflows
 
 ### 📊 Dashboard & Analytics
+
 - Company statistics (Admin)
 - Expense tracking by category
 - Recent expense history
@@ -46,6 +51,7 @@ A comprehensive expense management system with role-based access control, multi-
 - Employee dashboard with expense status
 
 ### 📧 Email Notifications
+
 - Welcome email on signup
 - Login notifications
 - User creation with auto-generated password
@@ -56,6 +62,7 @@ A comprehensive expense management system with role-based access control, multi-
 ## Tech Stack
 
 ### Backend
+
 - **Node.js** with Express.js
 - **PostgreSQL** with Prisma ORM
 - **JWT** for authentication
@@ -65,6 +72,7 @@ A comprehensive expense management system with role-based access control, multi-
 - **Axios** for external APIs
 
 ### Frontend
+
 - **React** 19+ with Vite
 - **React Router** for navigation
 - **Zustand** for state management
@@ -75,6 +83,7 @@ A comprehensive expense management system with role-based access control, multi-
 - **Axios** for API calls
 
 ### Design System
+
 - **Primary Color**: #5a3a52 (Deep Mauve) - Odoo's signature color
 - **Primary Light**: #875A7B (Light Mauve)
 - **Secondary Color**: #017E84 (Teal) - Pantone 322C, RAL 5021
@@ -83,6 +92,7 @@ A comprehensive expense management system with role-based access control, multi-
 - **Soft shadows and rounded corners** for a professional Odoo-inspired look
 
 ### External APIs
+
 - RestCountries API (country/currency data)
 - ExchangeRate API (currency conversion)
 - Cloudinary (image storage)
@@ -90,6 +100,7 @@ A comprehensive expense management system with role-based access control, multi-
 ## Installation
 
 ### Prerequisites
+
 - Node.js (v18 or higher)
 - PostgreSQL (v14 or higher)
 - Cloudinary account (free tier available)
@@ -97,16 +108,19 @@ A comprehensive expense management system with role-based access control, multi-
 ### Backend Setup
 
 1. **Clone the repository**
+
 ```bash
 cd Expencify/backend
 ```
 
 2. **Install dependencies**
+
 ```bash
 npm install
 ```
 
 3. **Configure environment variables**
+
 ```bash
 # Edit .env file with your credentials
 DATABASE_URL="postgresql://username:password@localhost:5432/expencify?schema=public"
@@ -131,6 +145,7 @@ NODE_ENV="development"
 ```
 
 4. **Setup database**
+
 ```bash
 # Generate Prisma client
 npx prisma generate
@@ -143,6 +158,7 @@ npx prisma db seed
 ```
 
 5. **Start the server**
+
 ```bash
 # Development mode with auto-reload
 npm run dev
@@ -156,16 +172,19 @@ The backend server will run on `http://localhost:5000`
 ### Frontend Setup
 
 1. **Navigate to frontend directory**
+
 ```bash
 cd Expencify/frontend
 ```
 
 2. **Install dependencies**
+
 ```bash
 npm install
 ```
 
 3. **Configure environment variables**
+
 ```bash
 # Create .env file
 cp .env.example .env
@@ -175,6 +194,7 @@ VITE_API_URL=http://localhost:5000/api
 ```
 
 4. **Start the development server**
+
 ```bash
 npm run dev
 ```
@@ -182,254 +202,8 @@ npm run dev
 The frontend will run on `http://localhost:5173`
 
 5. **Build for production**
+
 ```bash
 npm run build
 npm run preview
 ```
-
-## API Documentation
-
-### Authentication Endpoints
-
-#### POST /api/auth/signup
-Register new user and create company
-```json
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "password123",
-  "country": "United States"
-}
-```
-
-#### POST /api/auth/login
-Login existing user
-```json
-{
-  "email": "john@example.com",
-  "password": "password123"
-}
-```
-
-#### GET /api/auth/me
-Get current user profile (requires authentication)
-
-#### PUT /api/auth/change-password
-Change user password (requires authentication)
-```json
-{
-  "currentPassword": "oldpassword",
-  "newPassword": "newpassword"
-}
-```
-
-#### PUT /api/auth/update-profile
-Update user profile (requires authentication)
-```json
-{
-  "name": "Updated Name"
-}
-```
-
-#### GET /api/auth/countries
-Get list of all countries with currencies
-
-### User Management (Admin only)
-
-#### POST /api/users
-Create new user (employee/manager/executive). Password is auto-generated and emailed to user.
-```json
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "role": "EMPLOYEE",
-  "managerId": "optional-manager-id",
-  "isManagerApprover": false
-}
-```
-
-Roles: EMPLOYEE, MANAGER, ADMIN, CEO, CFO, CTO, DIRECTOR
-
-#### GET /api/users
-Get all users in company
-
-#### GET /api/users/:id
-Get user by ID
-
-#### PUT /api/users/:id
-Update user details
-
-#### DELETE /api/users/:id
-Delete user
-
-**Note:** Cannot delete users who:
-- Have employees reporting to them (reassign employees first)
-- Are currently set as ADMIN (at least one admin required)
-
-#### PUT /api/users/:id/assign-manager
-Assign manager to user
-
-### Expense Management
-
-#### POST /api/expenses
-Create new expense (with file upload)
-
-#### POST /api/expenses/ocr
-Process receipt with OCR
-
-#### GET /api/expenses
-Get all expenses (filtered by role)
-
-#### GET /api/expenses/:id
-Get expense details
-
-#### PUT /api/expenses/:id
-Update expense
-
-#### DELETE /api/expenses/:id
-Delete expense
-
-#### GET /api/expenses/user/:userId
-Get expenses for specific user
-
-### Approval Workflow
-
-#### POST /api/approvals/rules
-Create approval rule (Admin only)
-
-#### GET /api/approvals/rules
-Get all approval rules
-
-#### PUT /api/approvals/rules/:id
-Update approval rule
-
-#### DELETE /api/approvals/rules/:id
-Delete approval rule
-
-#### GET /api/approvals/pending
-Get pending approvals (Manager/Admin)
-
-#### POST /api/approvals/process/:expenseId
-Approve or reject expense
-
-### Category Management
-
-#### POST /api/categories
-Create category (Admin only)
-
-#### GET /api/categories
-Get all categories
-
-#### PUT /api/categories/:id
-Update category
-
-#### DELETE /api/categories/:id
-Delete category
-
-### Company Management
-
-#### GET /api/company
-Get company details
-
-#### PUT /api/company
-Update company (Admin only)
-
-#### GET /api/company/statistics
-Get company statistics
-
-## Database Schema
-
-### Models
-- **Company**: Organization data with currency
-- **User**: Employees, managers, and admins
-- **Category**: Expense categories
-- **Expense**: Expense records with approval status
-- **OcrData**: Extracted receipt data
-- **ApprovalRule**: Approval workflow rules
-- **ApprovalStep**: Sequential approval steps
-- **ApprovalAction**: Approval/rejection history
-
-## Approval Workflow Logic
-
-### Manager Approval Priority
-If `isManagerApprover` is checked for an employee, their manager MUST approve the expense first before it enters the main approval workflow.
-
-### Sequential Approval
-Expenses go through approvers one by one in defined order. Each approver must act before moving to the next.
-Example:
-- Step 1 → Manager
-- Step 2 → Finance Head  
-- Step 3 → Director
-
-### Percentage-based Approval
-Expense is approved when X% of defined approvers approve. Example: If 3 out of 5 approvers approve (60%), expense is auto-approved.
-
-### Specific Approver Rule
-If a specific person (e.g., CFO, CEO) approves, expense is automatically approved regardless of other approvers.
-
-### Hybrid Rule
-Combines percentage and specific approver: approve if EITHER condition is met.
-Example: Approve if (60% approve) OR (CFO approves)
-
-### Combined Workflows
-You can have BOTH sequential AND conditional rules active:
-1. Manager approves first (if enabled)
-2. Goes through sequential approvers
-3. At any point, conditional rules (percentage/specific/hybrid) can auto-approve
-
-### Rule Priority
-Multiple rules can exist. Higher priority rules are checked first. This allows for complex approval hierarchies.
-
-## Security Features
-
-- Password hashing with bcrypt
-- JWT token authentication
-- Role-based access control
-- Input validation with express-validator
-- SQL injection protection via Prisma
-- File upload validation
-- Environment variable protection
-
-## Error Handling
-
-Centralized error handling with proper HTTP status codes:
-- 400: Bad Request / Validation Error
-- 401: Unauthorized / Invalid Token
-- 403: Forbidden / Insufficient Permissions
-- 404: Not Found
-- 409: Conflict / Duplicate Entry
-- 500: Internal Server Error
-
-## Development Tips
-
-### Run Prisma Studio
-```bash
-npx prisma studio
-```
-
-### Reset Database
-```bash
-npx prisma migrate reset
-```
-
-### View Logs
-Server uses Morgan for HTTP request logging in development mode.
-
-## Production Deployment
-
-1. Set `NODE_ENV=production`
-2. Use strong `JWT_SECRET`
-3. Setup PostgreSQL with connection pooling
-4. Configure Cloudinary production account
-5. Enable HTTPS
-6. Setup proper CORS origins
-7. Add rate limiting
-8. Setup monitoring and logging
-
-## License
-
-ISC
-
-## Support
-
-For issues or questions, please create an issue in the repository.
