@@ -10,7 +10,7 @@ router.use(authenticate);
 router.post('/', authorize('ADMIN'), [
   body('name').trim().notEmpty(),
   body('email').isEmail(),
-  body('role').isIn(['EMPLOYEE', 'MANAGER']),
+  body('role').isIn(['EMPLOYEE', 'MANAGER', 'ADMIN', 'CEO', 'CFO', 'CTO', 'DIRECTOR']),
 ], UserController.createUser);
 
 router.get('/', UserController.getAllUsers);

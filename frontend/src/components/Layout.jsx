@@ -25,6 +25,30 @@ const Layout = () => {
       { to: '/my-expenses', icon: FileText, label: 'My Expenses' },
       { to: '/pending-approvals', icon: CheckSquare, label: 'Pending Approvals' },
     ],
+    CEO: [
+      { to: '/', icon: Home, label: 'Dashboard' },
+      { to: '/submit-expense', icon: PlusCircle, label: 'Submit Expense' },
+      { to: '/my-expenses', icon: FileText, label: 'My Expenses' },
+      { to: '/pending-approvals', icon: CheckSquare, label: 'Pending Approvals' },
+    ],
+    CFO: [
+      { to: '/', icon: Home, label: 'Dashboard' },
+      { to: '/submit-expense', icon: PlusCircle, label: 'Submit Expense' },
+      { to: '/my-expenses', icon: FileText, label: 'My Expenses' },
+      { to: '/pending-approvals', icon: CheckSquare, label: 'Pending Approvals' },
+    ],
+    CTO: [
+      { to: '/', icon: Home, label: 'Dashboard' },
+      { to: '/submit-expense', icon: PlusCircle, label: 'Submit Expense' },
+      { to: '/my-expenses', icon: FileText, label: 'My Expenses' },
+      { to: '/pending-approvals', icon: CheckSquare, label: 'Pending Approvals' },
+    ],
+    DIRECTOR: [
+      { to: '/', icon: Home, label: 'Dashboard' },
+      { to: '/submit-expense', icon: PlusCircle, label: 'Submit Expense' },
+      { to: '/my-expenses', icon: FileText, label: 'My Expenses' },
+      { to: '/pending-approvals', icon: CheckSquare, label: 'Pending Approvals' },
+    ],
     EMPLOYEE: [
       { to: '/', icon: Home, label: 'Dashboard' },
       { to: '/submit-expense', icon: PlusCircle, label: 'Submit Expense' },

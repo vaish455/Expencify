@@ -143,9 +143,13 @@ model ApprovalAction {
 }
 
 enum Role {
-  ADMIN
-  MANAGER
   EMPLOYEE
+  MANAGER
+  ADMIN
+  CEO
+  CFO
+  CTO
+  DIRECTOR
 }
 
 enum ExpenseStatus {

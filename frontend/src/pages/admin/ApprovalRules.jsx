@@ -27,10 +27,13 @@ const ApprovalRules = () => {
     try {
       const [rulesRes, usersRes] = await Promise.all([
         api.get('/approvals/rules'),
-        api.get('/users?role=MANAGER')
+        api.get('/users') // Fetch all users instead of just managers
       ]);
       setRules(rulesRes.data.rules);
-      setUsers(usersRes.data.users.filter(u => u.role === 'MANAGER' || u.role === 'ADMIN'));
+      // Filter to get managers and executive roles
+      setUsers(usersRes.data.users.filter(u => 
+        ['MANAGER', 'ADMIN', 'CEO', 'CFO', 'CTO', 'DIRECTOR'].includes(u.role)
+      ));
     } catch (error) {
       toast.error('Failed to load data');
     } finally {

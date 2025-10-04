@@ -6,14 +6,15 @@ A comprehensive expense management system with role-based access control, multi-
 
 ### 🔐 Authentication & Authorization
 - JWT-based authentication
-- Role-based access control (Admin, Manager, Employee)
+- Role-based access control (Admin, Manager, Employee, CEO, CFO, CTO, Director)
 - Automatic company creation on signup
 - Country-based currency selection
 
 ### 👥 User Management
-- Create and manage employees and managers
-- Assign roles and manager relationships
-- Define manager approval requirements
+- Create and manage employees, managers, and executives
+- Assign roles: Employee, Manager, Admin, CEO, CFO, CTO, Director
+- Define manager relationships and approval hierarchies
+- Configure manager approval requirements
 
 ### 💰 Expense Management
 - Submit expenses with multiple currencies
@@ -24,19 +25,24 @@ A comprehensive expense management system with role-based access control, multi-
 
 ### ✅ Approval Workflows
 - **Manager Priority**: Manager must approve first if `isManagerApprover` is enabled
-- **Sequential Approval**: Step-by-step approval chain with defined sequence
+- **Sequential Approval**: Step-by-step approval chain with defined sequence (e.g., Manager → CFO → CEO)
 - **Percentage-based**: Approve when X% of approvers agree
-- **Specific Approver**: Auto-approve if specific person (e.g., CFO) approves
+- **Specific Approver**: Auto-approve if specific person (e.g., CEO, CFO) approves
 - **Hybrid**: Combination of percentage OR specific approver
 - **Combined Workflows**: Support both sequential AND conditional rules together
 - **Rule Priority**: Higher priority rules are evaluated first
-- **Flexible Configuration**: Mix and match different approval strategies
+- **Flexible Configuration**: Mix and match different approval strategies with executive roles
+- **Executive Overrides**: CEOs and CFOs can be configured as specific approvers for instant approval
+- **Executive Dashboards**: CEO, CFO, CTO, and Director roles have dedicated dashboards with approval capabilities
+- **Multi-Role Support**: All executive roles can approve expenses assigned to them in workflows
 
 ### 📊 Dashboard & Analytics
-- Company statistics
+- Company statistics (Admin)
 - Expense tracking by category
 - Recent expense history
 - User expense reports
+- Manager/Executive dashboard with pending approvals
+- Employee dashboard with expense status
 
 ### 📧 Email Notifications
 - Welcome email on signup
@@ -205,7 +211,7 @@ Get list of all countries with currencies
 ### User Management (Admin only)
 
 #### POST /api/users
-Create new user (employee/manager). Password is auto-generated and emailed to user.
+Create new user (employee/manager/executive). Password is auto-generated and emailed to user.
 ```json
 {
   "name": "John Doe",
@@ -215,6 +221,8 @@ Create new user (employee/manager). Password is auto-generated and emailed to us
   "isManagerApprover": false
 }
 ```
+
+Roles: EMPLOYEE, MANAGER, ADMIN, CEO, CFO, CTO, DIRECTOR
 
 #### GET /api/users
 Get all users in company
@@ -227,6 +235,10 @@ Update user details
 
 #### DELETE /api/users/:id
 Delete user
+
+**Note:** Cannot delete users who:
+- Have employees reporting to them (reassign employees first)
+- Are currently set as ADMIN (at least one admin required)
 
 #### PUT /api/users/:id/assign-manager
 Assign manager to user

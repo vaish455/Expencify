@@ -161,21 +161,21 @@ class ApprovalController {
     try {
       let expenses = [];
 
-      if (req.user.role === 'MANAGER') {
-        // Get expenses where this manager needs to approve
-        const managerExpenses = await prisma.expense.findMany({
+      if (['MANAGER', 'CEO', 'CFO', 'CTO', 'DIRECTOR'].includes(req.user.role)) {
+        // Get expenses where this user needs to approve
+        const userExpenses = await prisma.expense.findMany({
           where: {
             companyId: req.user.companyId,
             OR: [
-              // Expenses from their team requiring manager approval
-              {
+              // Expenses from their team requiring manager approval (if they're a manager)
+              ...(req.user.role === 'MANAGER' ? [{
                 user: {
                   managerId: req.user.id,
                   isManagerApprover: true
                 },
                 managerApprovalComplete: false,
                 status: { in: ['PENDING', 'IN_PROGRESS'] }
-              },
+              }] : []),
               // Expenses in approval workflow where they are next approver
               {
                 status: 'IN_PROGRESS',
@@ -209,7 +209,7 @@ class ApprovalController {
           orderBy: { createdAt: 'desc' }
         });
 
-        expenses = managerExpenses;
+        expenses = userExpenses;
       } else if (req.user.role === 'ADMIN') {
         expenses = await prisma.expense.findMany({
           where: {
@@ -357,7 +357,7 @@ class ApprovalController {
 
             // Create pending approval actions for the workflow
             if (approvalRules.length > 0) {
-              await this.initializeApprovalWorkflow(expenseId, approvalRules, tx);
+              await initializeApprovalWorkflow(expenseId, approvalRules, tx);
             } else {
               // No approval rules, auto-approve
               console.log('No approval rules found, auto-approving');
@@ -437,7 +437,7 @@ class ApprovalController {
         }
 
         // Check if expense should be approved based on rules
-        const shouldApprove = await this.evaluateApprovalRules(
+        const shouldApprove = await evaluateApprovalRules(
           expenseId,
           approvalRules,
           tx
@@ -520,185 +520,194 @@ class ApprovalController {
   }
 
   async initializeApprovalWorkflow(expenseId, rules, tx) {
-    try {
-      console.log('Initializing approval workflow for expense:', expenseId);
-      
-      // Create pending approval actions based on rules
-      const allApprovers = new Set();
-
-      for (const rule of rules) {
-        if (rule.type === 'SEQUENTIAL') {
-          // For sequential, only add first approver
-          if (rule.steps && rule.steps.length > 0) {
-            allApprovers.add(rule.steps[0].approverId);
-            console.log('Added sequential first approver:', rule.steps[0].approverId);
-          }
-        } else if (rule.type === 'PERCENTAGE' || rule.type === 'HYBRID') {
-          // Add all approvers in steps
-          if (rule.steps) {
-            rule.steps.forEach(step => {
-              allApprovers.add(step.approverId);
-              console.log('Added approver:', step.approverId);
-            });
-          }
-        } else if (rule.type === 'SPECIFIC_APPROVER' && rule.specificApproverId) {
-          allApprovers.add(rule.specificApproverId);
-          console.log('Added specific approver:', rule.specificApproverId);
-        }
-      }
-
-      console.log('Total unique approvers:', allApprovers.size);
-
-      // Check for existing actions to avoid duplicates
-      const existingActions = await tx.approvalAction.findMany({
-        where: {
-          expenseId,
-          stepIndex: 0
-        },
-        select: { approverId: true }
-      });
-
-      const existingApproverIds = new Set(existingActions.map(a => a.approverId));
-      console.log('Existing approver actions:', existingApproverIds.size);
-
-      // Create pending actions only for new approvers
-      const actions = Array.from(allApprovers)
-        .filter(approverId => !existingApproverIds.has(approverId))
-        .map(approverId => ({
-          expenseId,
-          approverId,
-          status: 'PENDING',
-          stepIndex: 0
-        }));
-
-      console.log('Creating approval actions:', actions.length);
-
-      if (actions.length > 0) {
-        await tx.approvalAction.createMany({ data: actions });
-        console.log('Approval actions created successfully');
-      } else {
-        console.log('No new approval actions needed');
-      }
-    } catch (error) {
-      console.error('Initialize Approval Workflow Error:', {
-        message: error.message,
-        stack: error.stack,
-        expenseId
-      });
-      throw error;
-    }
+    return initializeApprovalWorkflow(expenseId, rules, tx);
   }
 
   async evaluateApprovalRules(expenseId, rules, tx) {
-    try {
-      console.log('Evaluating approval rules for expense:', expenseId);
+    return evaluateApprovalRules(expenseId, rules, tx);
+  }
+}
+
+// Helper functions defined outside the class to avoid context issues
+async function initializeApprovalWorkflow(expenseId, rules, tx) {
+  try {
+    console.log('Initializing approval workflow for expense:', expenseId);
+    
+    // Create pending approval actions based on rules
+    const allApprovers = new Set();
+
+    for (const rule of rules) {
+      if (rule.type === 'SEQUENTIAL') {
+        // For sequential, only add first approver
+        if (rule.steps && rule.steps.length > 0) {
+          allApprovers.add(rule.steps[0].approverId);
+          console.log('Added sequential first approver:', rule.steps[0].approverId);
+        }
+      } else if (rule.type === 'PERCENTAGE' || rule.type === 'HYBRID') {
+        // Add all approvers in steps
+        if (rule.steps) {
+          rule.steps.forEach(step => {
+            allApprovers.add(step.approverId);
+            console.log('Added approver:', step.approverId);
+          });
+        }
+      } else if (rule.type === 'SPECIFIC_APPROVER' && rule.specificApproverId) {
+        allApprovers.add(rule.specificApproverId);
+        console.log('Added specific approver:', rule.specificApproverId);
+      }
+    }
+
+    console.log('Total unique approvers:', allApprovers.size);
+
+    // Check for existing actions to avoid duplicates
+    const existingActions = await tx.approvalAction.findMany({
+      where: {
+        expenseId,
+        stepIndex: 0
+      },
+      select: { approverId: true }
+    });
+
+    const existingApproverIds = new Set(existingActions.map(a => a.approverId));
+    console.log('Existing approver actions:', existingApproverIds.size);
+
+    // Create pending actions only for new approvers
+    const actions = Array.from(allApprovers)
+      .filter(approverId => !existingApproverIds.has(approverId))
+      .map(approverId => ({
+        expenseId,
+        approverId,
+        status: 'PENDING',
+        stepIndex: 0
+      }));
+
+    console.log('Creating approval actions:', actions.length);
+
+    if (actions.length > 0) {
+      await tx.approvalAction.createMany({ data: actions });
+      console.log('Approval actions created successfully');
+    } else {
+      console.log('No new approval actions needed');
+    }
+  } catch (error) {
+    console.error('Initialize Approval Workflow Error:', {
+      message: error.message,
+      stack: error.stack,
+      expenseId
+    });
+    throw error;
+  }
+}
+
+async function evaluateApprovalRules(expenseId, rules, tx) {
+  try {
+    console.log('Evaluating approval rules for expense:', expenseId);
+    
+    const approvedActions = await tx.approvalAction.findMany({
+      where: {
+        expenseId,
+        status: 'APPROVED',
+        stepIndex: { gte: 0 } // Only count workflow approvals, not manager (-1)
+      },
+      include: {
+        approver: true
+      }
+    });
+
+    console.log('Approved actions count:', approvedActions.length);
+
+    const approverIds = approvedActions.map(a => a.approverId);
+
+    // Check each rule (sorted by priority)
+    for (const rule of rules) {
+      console.log('Checking rule:', rule.name, rule.type);
       
-      const approvedActions = await tx.approvalAction.findMany({
-        where: {
-          expenseId,
-          status: 'APPROVED',
-          stepIndex: { gte: 0 } // Only count workflow approvals, not manager (-1)
-        },
-        include: {
-          approver: true
-        }
-      });
-
-      console.log('Approved actions count:', approvedActions.length);
-
-      const approverIds = approvedActions.map(a => a.approverId);
-
-      // Check each rule (sorted by priority)
-      for (const rule of rules) {
-        console.log('Checking rule:', rule.name, rule.type);
-        
-        // SPECIFIC_APPROVER: If specific person approved, auto-approve
-        if (rule.type === 'SPECIFIC_APPROVER') {
-          if (rule.specificApproverId && approverIds.includes(rule.specificApproverId)) {
-            console.log('Rule satisfied: SPECIFIC_APPROVER');
-            return {
-              approved: true,
-              reason: `Auto-approved by specific approver: ${rule.specificApprover?.name || 'Unknown'}`
-            };
-          }
-        }
-
-        // PERCENTAGE: Check if required percentage met
-        if (rule.type === 'PERCENTAGE') {
-          const totalApprovers = rule.steps?.length || 0;
-          const approvedCount = (rule.steps || []).filter(step =>
-            approverIds.includes(step.approverId)
-          ).length;
-          const percentage = totalApprovers > 0 ? (approvedCount / totalApprovers) * 100 : 0;
-
-          console.log('Percentage check:', { approvedCount, totalApprovers, percentage, required: rule.percentageRequired });
-
-          if (percentage >= (rule.percentageRequired || 0)) {
-            console.log('Rule satisfied: PERCENTAGE');
-            return {
-              approved: true,
-              reason: `Approved by ${percentage.toFixed(0)}% of approvers (required: ${rule.percentageRequired}%)`
-            };
-          }
-        }
-
-        // SEQUENTIAL: Check if all steps completed
-        if (rule.type === 'SEQUENTIAL') {
-          const allStepsApproved = (rule.steps || []).every(step =>
-            approverIds.includes(step.approverId)
-          );
-
-          console.log('Sequential check:', { allStepsApproved, totalSteps: rule.steps?.length });
-
-          if (allStepsApproved && rule.steps && rule.steps.length > 0) {
-            console.log('Rule satisfied: SEQUENTIAL');
-            return {
-              approved: true,
-              reason: 'All sequential approvers have approved'
-            };
-          }
-        }
-
-        // HYBRID: Specific approver OR percentage
-        if (rule.type === 'HYBRID') {
-          // Check specific approver
-          if (rule.specificApproverId && approverIds.includes(rule.specificApproverId)) {
-            console.log('Rule satisfied: HYBRID (specific approver)');
-            return {
-              approved: true,
-              reason: `Auto-approved by specific approver: ${rule.specificApprover?.name || 'Unknown'}`
-            };
-          }
-
-          // Check percentage
-          const totalApprovers = rule.steps?.length || 0;
-          const approvedCount = (rule.steps || []).filter(step =>
-            approverIds.includes(step.approverId)
-          ).length;
-          const percentage = totalApprovers > 0 ? (approvedCount / totalApprovers) * 100 : 0;
-
-          console.log('Hybrid percentage check:', { approvedCount, totalApprovers, percentage, required: rule.percentageRequired });
-
-          if (percentage >= (rule.percentageRequired || 0)) {
-            console.log('Rule satisfied: HYBRID (percentage)');
-            return {
-              approved: true,
-              reason: `Approved by ${percentage.toFixed(0)}% of approvers (required: ${rule.percentageRequired}%)`
-            };
-          }
+      // SPECIFIC_APPROVER: If specific person approved, auto-approve
+      if (rule.type === 'SPECIFIC_APPROVER') {
+        if (rule.specificApproverId && approverIds.includes(rule.specificApproverId)) {
+          console.log('Rule satisfied: SPECIFIC_APPROVER');
+          return {
+            approved: true,
+            reason: `Auto-approved by specific approver: ${rule.specificApprover?.name || 'Unknown'}`
+          };
         }
       }
 
-      console.log('No rules satisfied yet');
-      return { approved: false };
-    } catch (error) {
-      console.error('Evaluate Approval Rules Error:', {
-        message: error.message,
-        stack: error.stack,
-        expenseId
-      });
-      throw error;
+      // PERCENTAGE: Check if required percentage met
+      if (rule.type === 'PERCENTAGE') {
+        const totalApprovers = rule.steps?.length || 0;
+        const approvedCount = (rule.steps || []).filter(step =>
+          approverIds.includes(step.approverId)
+        ).length;
+        const percentage = totalApprovers > 0 ? (approvedCount / totalApprovers) * 100 : 0;
+
+        console.log('Percentage check:', { approvedCount, totalApprovers, percentage, required: rule.percentageRequired });
+
+        if (percentage >= (rule.percentageRequired || 0)) {
+          console.log('Rule satisfied: PERCENTAGE');
+          return {
+            approved: true,
+            reason: `Approved by ${percentage.toFixed(0)}% of approvers (required: ${rule.percentageRequired}%)`
+          };
+        }
+      }
+
+      // SEQUENTIAL: Check if all steps completed
+      if (rule.type === 'SEQUENTIAL') {
+        const allStepsApproved = (rule.steps || []).every(step =>
+          approverIds.includes(step.approverId)
+        );
+
+        console.log('Sequential check:', { allStepsApproved, totalSteps: rule.steps?.length });
+
+        if (allStepsApproved && rule.steps && rule.steps.length > 0) {
+          console.log('Rule satisfied: SEQUENTIAL');
+          return {
+            approved: true,
+            reason: 'All sequential approvers have approved'
+          };
+        }
+      }
+
+      // HYBRID: Specific approver OR percentage
+      if (rule.type === 'HYBRID') {
+        // Check specific approver
+        if (rule.specificApproverId && approverIds.includes(rule.specificApproverId)) {
+          console.log('Rule satisfied: HYBRID (specific approver)');
+          return {
+            approved: true,
+            reason: `Auto-approved by specific approver: ${rule.specificApprover?.name || 'Unknown'}`
+          };
+        }
+
+        // Check percentage
+        const totalApprovers = rule.steps?.length || 0;
+        const approvedCount = (rule.steps || []).filter(step =>
+          approverIds.includes(step.approverId)
+        ).length;
+        const percentage = totalApprovers > 0 ? (approvedCount / totalApprovers) * 100 : 0;
+
+        console.log('Hybrid percentage check:', { approvedCount, totalApprovers, percentage, required: rule.percentageRequired });
+
+        if (percentage >= (rule.percentageRequired || 0)) {
+          console.log('Rule satisfied: HYBRID (percentage)');
+          return {
+            approved: true,
+            reason: `Approved by ${percentage.toFixed(0)}% of approvers (required: ${rule.percentageRequired}%)`
+          };
+        }
+      }
     }
+
+    console.log('No rules satisfied yet');
+    return { approved: false };
+  } catch (error) {
+    console.error('Evaluate Approval Rules Error:', {
+      message: error.message,
+      stack: error.stack,
+      expenseId
+    });
+    throw error;
   }
 }
 

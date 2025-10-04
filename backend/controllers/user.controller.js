@@ -8,6 +8,7 @@ class UserController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        console.error('Validation errors:', errors.array());
         return res.status(400).json({ errors: errors.array() });
       }
 
@@ -165,10 +166,71 @@ class UserController {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      await prisma.user.delete({ where: { id } });
+      // Check if user has employees reporting to them
+      const employeeCount = await prisma.user.count({
+        where: { managerId: id }
+      });
+
+      if (employeeCount > 0) {
+        return res.status(400).json({ 
+          error: `Cannot delete user. ${employeeCount} employee(s) are reporting to this manager. Please reassign them first.` 
+        });
+      }
+
+      // Check if user has pending expenses
+      const pendingExpensesCount = await prisma.expense.count({
+        where: { 
+          userId: id,
+          status: { in: ['PENDING', 'IN_PROGRESS'] }
+        }
+      });
+
+      if (pendingExpensesCount > 0) {
+        return res.status(400).json({ 
+          error: `Cannot delete user. They have ${pendingExpensesCount} pending expense(s). Please resolve them first.` 
+        });
+      }
+
+      // Use transaction to handle related records in correct order
+      await prisma.$transaction(async (tx) => {
+        // 1. Delete approval actions first (has FK to user)
+        await tx.approvalAction.deleteMany({
+          where: { approverId: id }
+        });
+
+        // 2. Delete approval steps (has FK to user and approval rule)
+        await tx.approvalStep.deleteMany({
+          where: { approverId: id }
+        });
+
+        // 3. Update approval rules to remove this user as specific approver
+        await tx.approvalRule.updateMany({
+          where: { specificApproverId: id },
+          data: { specificApproverId: null }
+        });
+
+        // 4. Delete user's expenses (will cascade delete OCR data and approval actions)
+        await tx.expense.deleteMany({
+          where: { userId: id }
+        });
+
+        // 5. Finally delete the user
+        await tx.user.delete({ where: { id } });
+      });
 
       res.json({ message: 'User deleted successfully' });
     } catch (error) {
+      console.error('Delete user error:', error);
+      if (error.code === 'P2003') {
+        return res.status(400).json({ 
+          error: 'Cannot delete user due to existing related records. Please contact support.' 
+        });
+      }
+      if (error.code === 'P2014') {
+        return res.status(400).json({ 
+          error: 'Cannot delete user due to database constraints. Please ensure all related records are removed first.' 
+        });
+      }
       next(error);
     }
   }

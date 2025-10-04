@@ -67,13 +67,15 @@ class ExpenseController {
             steps: {
               include: { approver: true },
               orderBy: { sequence: 'asc' }
-            }
+            },
+            specificApprover: true
           },
           orderBy: { priority: 'desc' }
         });
 
         if (approvalRules.length > 0) {
-          await this.initializeWorkflow(expense.id, approvalRules);
+          // CRITICAL FIX: Call the standalone function, NOT this.initializeWorkflow
+          await initializeExpenseWorkflow(expense.id, approvalRules);
         }
       }
 
@@ -84,32 +86,8 @@ class ExpenseController {
         expense
       });
     } catch (error) {
+      console.error('Create Expense Error:', error);
       next(error);
-    }
-  }
-
-  async initializeWorkflow(expenseId, rules) {
-    const allApprovers = new Set();
-
-    for (const rule of rules) {
-      if (rule.type === 'SEQUENTIAL' && rule.steps.length > 0) {
-        allApprovers.add(rule.steps[0].approverId);
-      } else if (rule.type === 'PERCENTAGE' || rule.type === 'HYBRID') {
-        rule.steps.forEach(step => allApprovers.add(step.approverId));
-      } else if (rule.type === 'SPECIFIC_APPROVER' && rule.specificApproverId) {
-        allApprovers.add(rule.specificApproverId);
-      }
-    }
-
-    const actions = Array.from(allApprovers).map(approverId => ({
-      expenseId,
-      approverId,
-      status: 'PENDING',
-      stepIndex: 0
-    }));
-
-    if (actions.length > 0) {
-      await prisma.approvalAction.createMany({ data: actions });
     }
   }
 
@@ -327,6 +305,42 @@ class ExpenseController {
     } catch (error) {
       next(error);
     }
+  }
+}
+
+// Helper function for initializing expense workflow (must be outside the class)
+async function initializeExpenseWorkflow(expenseId, rules) {
+  try {
+    console.log('Initializing expense workflow for:', expenseId);
+    
+    const allApprovers = new Set();
+
+    for (const rule of rules) {
+      if (rule.type === 'SEQUENTIAL' && rule.steps.length > 0) {
+        allApprovers.add(rule.steps[0].approverId);
+      } else if (rule.type === 'PERCENTAGE' || rule.type === 'HYBRID') {
+        rule.steps.forEach(step => allApprovers.add(step.approverId));
+      } else if (rule.type === 'SPECIFIC_APPROVER' && rule.specificApproverId) {
+        allApprovers.add(rule.specificApproverId);
+      }
+    }
+
+    console.log('Total unique approvers:', allApprovers.size);
+
+    const actions = Array.from(allApprovers).map(approverId => ({
+      expenseId,
+      approverId,
+      status: 'PENDING',
+      stepIndex: 0
+    }));
+
+    if (actions.length > 0) {
+      await prisma.approvalAction.createMany({ data: actions });
+      console.log('Created', actions.length, 'approval actions for expense:', expenseId);
+    }
+  } catch (error) {
+    console.error('Initialize Expense Workflow Error:', error);
+    throw error;
   }
 }
 

@@ -37,7 +37,9 @@ const UserManagement = () => {
 
     try {
       if (editingUser) {
-        await api.put(`/users/${editingUser.id}`, formData);
+        // Don't send email when editing
+        const { email, ...updateData } = formData;
+        await api.put(`/users/${editingUser.id}`, updateData);
         toast.success('User updated successfully');
       } else {
         await api.post('/users', formData);
@@ -47,7 +49,8 @@ const UserManagement = () => {
       resetForm();
       fetchUsers();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Operation failed');
+      console.error('User management error:', error.response?.data);
+      toast.error(error.response?.data?.error || error.response?.data?.errors?.[0]?.msg || 'Operation failed');
     } finally {
       setLoading(false);
     }
@@ -61,7 +64,9 @@ const UserManagement = () => {
       toast.success('User deleted successfully');
       fetchUsers();
     } catch (error) {
-      toast.error('Failed to delete user');
+      console.error('Delete user error:', error.response?.data);
+      const errorMessage = error.response?.data?.error || 'Failed to delete user';
+      toast.error(errorMessage);
     }
   };
 
@@ -211,10 +216,14 @@ const UserManagement = () => {
                 <input
                   type="email"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  disabled={editingUser}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
+                {editingUser && (
+                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                )}
               </div>
 
               <div>
@@ -226,6 +235,11 @@ const UserManagement = () => {
                 >
                   <option value="EMPLOYEE">Employee</option>
                   <option value="MANAGER">Manager</option>
+                  <option value="DIRECTOR">Director</option>
+                  <option value="CFO">CFO</option>
+                  <option value="CTO">CTO</option>
+                  <option value="CEO">CEO</option>
+                  <option value="ADMIN">Admin</option>
                 </select>
               </div>
 
