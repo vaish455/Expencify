@@ -47,14 +47,16 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #F8F8F8 0%, #F5F3F4 100%)' }}>
+      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <DollarSign className="w-16 h-16" style={{ color: '#714B67' }} />
+            <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg, #5a3a52 0%, #017E84 100%)' }}>
+              <DollarSign className="w-10 h-10 text-white" />
+            </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
-          <p className="text-gray-600 mt-2">Start managing expenses today</p>
+          <h2 className="text-3xl font-bold" style={{ color: '#5a3a52' }}>Create Account</h2>
+          <p style={{ color: '#8F8F8F' }} className="mt-2">Start managing expenses today</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

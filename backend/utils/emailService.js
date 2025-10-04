@@ -20,18 +20,22 @@ class EmailService {
       to: user.email,
       subject: 'Welcome to Expencify!',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #714B67;">Welcome to Expencify!</h2>
-          <p>Hi ${user.name},</p>
-          <p>Your account has been successfully created as an <strong>${user.role}</strong> in <strong>${company.name}</strong>.</p>
-          <p>You can now start managing your expenses efficiently.</p>
-          <div style="margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" 
-               style="background-color: #714B67; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              Login to Your Account
-            </a>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <div style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%); padding: 40px; text-align: center;">
+            <h2 style="color: #ffffff; margin: 0; font-size: 28px;">Welcome to Expencify!</h2>
           </div>
-          <p>Best regards,<br>The Expencify Team</p>
+          <div style="padding: 40px;">
+            <p style="color: #333333; font-size: 16px;">Hi ${user.name},</p>
+            <p style="color: #8F8F8F; font-size: 14px; line-height: 1.6;">Your account has been successfully created as an <strong style="color: #714B67;">${user.role}</strong> in <strong style="color: #714B67;">${company.name}</strong>.</p>
+            <p style="color: #8F8F8F; font-size: 14px; line-height: 1.6;">You can now start managing your expenses efficiently.</p>
+            <div style="margin: 30px 0; text-align: center;">
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" 
+                 style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600;">
+                Login to Your Account
+              </a>
+            </div>
+            <p style="color: #8F8F8F; font-size: 14px;">Best regards,<br><strong style="color: #714B67;">The Expencify Team</strong></p>
+          </div>
         </div>
       `,
     };
@@ -45,28 +49,32 @@ class EmailService {
       to: user.email,
       subject: 'Your Expencify Account Has Been Created',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #714B67;">Your Expencify Account is Ready!</h2>
-          <p>Hi ${user.name},</p>
-          <p>${createdBy.name} has created an account for you in <strong>${company.name}</strong>.</p>
-          <p>Your role: <strong>${user.role}</strong></p>
-          
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 5px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #1f2937;">Login Credentials</h3>
-            <p style="margin: 5px 0;"><strong>Email:</strong> ${user.email}</p>
-            <p style="margin: 5px 0;"><strong>Temporary Password:</strong> <code style="background-color: #e5e7eb; padding: 5px 10px; border-radius: 3px;">${password}</code></p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <div style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%); padding: 40px; text-align: center;">
+            <h2 style="color: #ffffff; margin: 0; font-size: 28px;">Your Expencify Account is Ready!</h2>
           </div>
+          <div style="padding: 40px;">
+            <p style="color: #333333; font-size: 16px;">Hi ${user.name},</p>
+            <p style="color: #8F8F8F; font-size: 14px; line-height: 1.6;">${createdBy.name} has created an account for you in <strong style="color: #714B67;">${company.name}</strong>.</p>
+            <p style="color: #8F8F8F; font-size: 14px;">Your role: <strong style="color: #017E84;">${user.role}</strong></p>
+            
+            <div style="background-color: #F8F8F8; padding: 24px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #017E84;">
+              <h3 style="margin-top: 0; color: #714B67; font-size: 18px;">Login Credentials</h3>
+              <p style="margin: 8px 0; color: #333333;"><strong>Email:</strong> ${user.email}</p>
+              <p style="margin: 8px 0; color: #333333;"><strong>Temporary Password:</strong> <code style="background-color: #E5E5E5; padding: 6px 12px; border-radius: 4px; color: #017E84; font-weight: 600;">${password}</code></p>
+            </div>
 
-          <p style="color: #ef4444;"><strong>Important:</strong> Please change your password after your first login for security reasons.</p>
-          
-          <div style="margin: 30px 0;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" 
-               style="background-color: #714B67; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              Login Now
-            </a>
+            <p style="color: #ef4444; font-size: 14px; background-color: #FEE2E2; padding: 12px; border-radius: 6px;"><strong>⚠️ Important:</strong> Please change your password after your first login for security reasons.</p>
+            
+            <div style="margin: 30px 0; text-align: center;">
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" 
+                 style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600;">
+                Login Now
+              </a>
+            </div>
+            
+            <p style="color: #8F8F8F; font-size: 14px;">Best regards,<br><strong style="color: #714B67;">The Expencify Team</strong></p>
           </div>
-          
-          <p>Best regards,<br>The Expencify Team</p>
         </div>
       `,
     };

@@ -63,12 +63,12 @@ const PendingApprovals = () => {
       <h1 className="text-2xl font-bold text-gray-900">Pending Approvals</h1>
 
       {expenses.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+        <div className="card p-12 text-center">
+          <FileText className="w-16 h-16 mx-auto mb-4" style={{ color: '#8F8F8F' }} />
           <p className="text-gray-500 text-lg">No pending approvals</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="card overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -127,7 +127,7 @@ const PendingApprovals = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <Link
                       to={`/expense/${expense.id}`}
-                      className="text-primary hover:text-primary inline-flex items-center space-x-1"
+                      className="text-primary hover:text-primary inline-flex items-center space-x-1 transition-colors"
                     >
                       <Eye className="w-4 h-4" />
                       <span>View</span>
@@ -135,7 +135,10 @@ const PendingApprovals = () => {
                     <button
                       onClick={() => openApprovalModal(expense, 'APPROVED')}
                       disabled={processingId === expense.id}
-                      className="text-green-600 hover:text-green-900 inline-flex items-center space-x-1 disabled:opacity-50"
+                      className="inline-flex items-center space-x-1 disabled:opacity-50 transition-colors"
+                      style={{ color: '#059669' }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#047857'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#059669'}
                     >
                       <CheckCircle className="w-4 h-4" />
                       <span>Approve</span>
@@ -143,7 +146,10 @@ const PendingApprovals = () => {
                     <button
                       onClick={() => openApprovalModal(expense, 'REJECTED')}
                       disabled={processingId === expense.id}
-                      className="text-red-600 hover:text-red-900 inline-flex items-center space-x-1 disabled:opacity-50"
+                      className="inline-flex items-center space-x-1 disabled:opacity-50 transition-colors"
+                      style={{ color: '#DC2626' }}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#B91C1C'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = '#DC2626'}
                     >
                       <XCircle className="w-4 h-4" />
                       <span>Reject</span>
@@ -159,7 +165,7 @@ const PendingApprovals = () => {
       {showModal && selectedExpense && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">
+            <h2 className="text-xl font-bold mb-4" style={{ color: '#714B67' }}>
               {selectedExpense.approvalStatus === 'APPROVED' ? 'Approve' : 'Reject'} Expense
             </h2>
             <div className="mb-4">
@@ -179,7 +185,7 @@ const PendingApprovals = () => {
               </label>
               <textarea
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
                 placeholder="Add comments..."
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
@@ -188,14 +194,14 @@ const PendingApprovals = () => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => { setShowModal(false); setComments(''); setSelectedExpense(null); }}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleApproval(selectedExpense.id, selectedExpense.approvalStatus)}
                 disabled={processingId === selectedExpense.id}
-                className={`px-4 py-2 rounded-lg text-white disabled:opacity-50 ${
+                className={`px-5 py-2.5 rounded-xl text-white disabled:opacity-50 font-medium shadow-lg transition-all ${
                   selectedExpense.approvalStatus === 'APPROVED'
                     ? 'btn-primary'
                     : 'bg-red-600 hover:bg-red-700'

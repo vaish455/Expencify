@@ -51,7 +51,7 @@ const ExecutiveDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="card p-6 hover:shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">My Expenses</p>
