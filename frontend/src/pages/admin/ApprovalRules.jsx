@@ -14,6 +14,8 @@ const ApprovalRules = () => {
     type: 'SEQUENTIAL',
     percentageRequired: 50,
     specificApproverId: '',
+    priority: 0,
+    requiresManagerFirst: false,
     steps: []
   });
 
@@ -77,6 +79,8 @@ const ApprovalRules = () => {
       type: rule.type,
       percentageRequired: rule.percentageRequired || 50,
       specificApproverId: rule.specificApproverId || '',
+      priority: rule.priority || 0,
+      requiresManagerFirst: rule.requiresManagerFirst || false,
       steps: rule.steps.map(s => ({ approverId: s.approverId }))
     });
     setShowModal(true);
@@ -89,6 +93,8 @@ const ApprovalRules = () => {
       type: 'SEQUENTIAL',
       percentageRequired: 50,
       specificApproverId: '',
+      priority: 0,
+      requiresManagerFirst: false,
       steps: []
     });
   };
@@ -148,27 +154,46 @@ const ApprovalRules = () => {
                 </div>
                 <p className="text-sm text-gray-600 mb-3">Type: {rule.type}</p>
                 
-                {rule.type === 'PERCENTAGE' && (
-                  <p className="text-sm text-gray-600">Required: {rule.percentageRequired}% approval</p>
-                )}
-                
-                {rule.type === 'SPECIFIC_APPROVER' && rule.specificApproverId && (
-                  <p className="text-sm text-gray-600">Specific Approver: {users.find(u => u.id === rule.specificApproverId)?.name}</p>
-                )}
-                
-                {rule.steps.length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Approval Steps:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {rule.steps.map((step, index) => (
-                        <div key={step.id} className="flex items-center space-x-2 bg-gray-100 px-3 py-1 rounded-full">
-                          <span className="text-xs font-semibold text-gray-600">Step {index + 1}:</span>
-                          <span className="text-xs text-gray-800">{step.approver.name}</span>
-                        </div>
-                      ))}
+                <div className="space-y-2 text-sm">
+                  {rule.requiresManagerFirst && (
+                    <p className="text-purple-600 font-medium">⚡ Requires Manager Approval First</p>
+                  )}
+                  
+                  <p className="text-gray-600">Priority: {rule.priority}</p>
+
+                  {rule.type === 'PERCENTAGE' && (
+                    <p className="text-gray-600">Required: {rule.percentageRequired}% approval</p>
+                  )}
+                  
+                  {rule.type === 'SPECIFIC_APPROVER' && rule.specificApprover && (
+                    <p className="text-gray-600">Specific Approver: {rule.specificApprover.name} ({rule.specificApprover.role})</p>
+                  )}
+                  
+                  {rule.type === 'HYBRID' && (
+                    <div className="bg-blue-50 p-2 rounded">
+                      <p className="text-blue-800 font-medium">Hybrid Rule:</p>
+                      <p className="text-blue-700">• {rule.percentageRequired}% of approvers OR</p>
+                      <p className="text-blue-700">• {rule.specificApprover?.name} approves</p>
                     </div>
-                  </div>
-                )}
+                  )}
+                  
+                  {rule.steps.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-sm font-medium text-gray-700 mb-2">
+                        {rule.type === 'SEQUENTIAL' ? 'Approval Sequence:' : 'Approvers:'}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {rule.steps.map((step, index) => (
+                          <div key={step.id} className="flex items-center space-x-2 bg-gray-100 px-3 py-1 rounded-full">
+                            {rule.type === 'SEQUENTIAL' && <span className="text-xs font-semibold text-gray-600">Step {index + 1}:</span>}
+                            <span className="text-xs text-gray-800">{step.approver.name}</span>
+                            <span className="text-xs text-gray-500">({step.approver.role})</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="flex space-x-2">
@@ -256,6 +281,31 @@ const ApprovalRules = () => {
                   </select>
                 </div>
               )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={formData.priority}
+                  onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })}
+                />
+                <p className="text-xs text-gray-500 mt-1">Higher priority rules are evaluated first</p>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="requiresManagerFirst"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  checked={formData.requiresManagerFirst}
+                  onChange={(e) => setFormData({ ...formData, requiresManagerFirst: e.target.checked })}
+                />
+                <label htmlFor="requiresManagerFirst" className="ml-2 block text-sm text-gray-700">
+                  Require manager approval before this rule applies
+                </label>
+              </div>
 
               <div>
                 <div className="flex justify-between items-center mb-2">

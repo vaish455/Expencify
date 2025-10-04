@@ -22,13 +22,15 @@ class ExpenseController {
         );
       }
 
-      // Convert to company currency
       const companyCurrency = req.user.company.currency;
       const amountInCompanyCurrency = await currencyService.convert(
         parseFloat(amount),
         currency,
         companyCurrency
       );
+
+      // Determine initial status and approval flow
+      const needsManagerApproval = req.user.manager && req.user.isManagerApprover;
 
       const expense = await prisma.expense.create({
         data: {
@@ -43,34 +45,71 @@ class ExpenseController {
           categoryId,
           userId: req.user.id,
           companyId: req.user.companyId,
-          status: 'PENDING'
+          status: needsManagerApproval ? 'PENDING' : 'IN_PROGRESS',
+          managerApprovalComplete: !needsManagerApproval
         },
         include: {
           category: true,
           user: {
-            select: { id: true, name: true, email: true }
+            select: { id: true, name: true, email: true, manager: { select: { name: true } } }
           }
         }
       });
 
-      // Create initial approval action if manager approver
-      if (req.user.manager && req.user.isManagerApprover) {
-        await prisma.approvalAction.create({
-          data: {
-            expenseId: expense.id,
-            approverId: req.user.managerId,
-            status: 'PENDING',
-            stepIndex: 0
-          }
+      // If no manager approval needed, initialize workflow immediately
+      if (!needsManagerApproval) {
+        const approvalRules = await prisma.approvalRule.findMany({
+          where: {
+            companyId: req.user.companyId,
+            isActive: true
+          },
+          include: {
+            steps: {
+              include: { approver: true },
+              orderBy: { sequence: 'asc' }
+            }
+          },
+          orderBy: { priority: 'desc' }
         });
+
+        if (approvalRules.length > 0) {
+          await this.initializeWorkflow(expense.id, approvalRules);
+        }
       }
 
       res.status(201).json({
-        message: 'Expense created successfully',
+        message: needsManagerApproval 
+          ? 'Expense submitted. Waiting for manager approval.' 
+          : 'Expense submitted for approval.',
         expense
       });
     } catch (error) {
       next(error);
+    }
+  }
+
+  async initializeWorkflow(expenseId, rules) {
+    const allApprovers = new Set();
+
+    for (const rule of rules) {
+      if (rule.type === 'SEQUENTIAL' && rule.steps.length > 0) {
+        allApprovers.add(rule.steps[0].approverId);
+      } else if (rule.type === 'PERCENTAGE' || rule.type === 'HYBRID') {
+        rule.steps.forEach(step => allApprovers.add(step.approverId));
+      } else if (rule.type === 'SPECIFIC_APPROVER' && rule.specificApproverId) {
+        allApprovers.add(rule.specificApproverId);
+      }
+    }
+
+    const actions = Array.from(allApprovers).map(approverId => ({
+      expenseId,
+      approverId,
+      status: 'PENDING',
+      stepIndex: 0
+    }));
+
+    if (actions.length > 0) {
+      await prisma.approvalAction.createMany({ data: actions });
     }
   }
 

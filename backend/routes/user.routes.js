@@ -10,7 +10,6 @@ router.use(authenticate);
 router.post('/', authorize('ADMIN'), [
   body('name').trim().notEmpty(),
   body('email').isEmail(),
-  body('password').isLength({ min: 6 }),
   body('role').isIn(['EMPLOYEE', 'MANAGER']),
 ], UserController.createUser);
 
