@@ -59,21 +59,17 @@ const EmployeeDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <div key={index} className="card p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                stat.color === 'blue' ? 'bg-blue-100' :
-                stat.color === 'yellow' ? 'bg-yellow-100' :
-                stat.color === 'green' ? 'bg-green-100' : 'bg-red-100'
-              }`}>
-                <stat.icon className={`w-6 h-6 ${
-                  stat.color === 'blue' ? 'text-blue-600' :
-                  stat.color === 'yellow' ? 'text-yellow-600' :
-                  stat.color === 'green' ? 'text-green-600' : 'text-red-600'
-                }`} />
-              </div>
+            <p className="text-sm font-medium text-gray-600 mb-2">{stat.label}</p>
+            <p className="text-4xl font-bold text-gray-900">{stat.value}</p>
+            <div className="mt-4 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <div className="h-full rounded-full transition-all" style={{
+                width: stat.value > 0 ? '75%' : '0%',
+                background: stat.color === 'blue' ? 'linear-gradient(90deg, #3B82F6 0%, #60A5FA 100%)' :
+                            stat.color === 'yellow' ? 'linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%)' :
+                            stat.color === 'green' ? 'linear-gradient(90deg, #10B981 0%, #34D399 100%)' :
+                            'linear-gradient(90deg, #EF4444 0%, #F87171 100%)'
+              }}></div>
             </div>
-            <p className="text-sm font-medium text-gray-600">{stat.label}</p>
-            <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
           </div>
         ))}
       </div>
@@ -130,5 +126,6 @@ const EmployeeDashboard = () => {
     </div>
   );
 };
+
 
 export default EmployeeDashboard;
