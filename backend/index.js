@@ -39,7 +39,14 @@ app.get('/health', (req, res) => {
 });
 
 // Error handling
-app.use(errorHandler);
+app.use((err, req, res, next) => {
+  console.error('Error details:', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path
+  });
+  errorHandler(err, req, res, next);
+});
 
 // 404 handler
 app.use((req, res) => {
@@ -48,4 +55,5 @@ app.use((req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
