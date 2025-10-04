@@ -151,8 +151,5 @@ const ManagerDashboard = () => {
   );
 };
 
-export default ManagerDashboard;
-  );
-};
 
 export default ManagerDashboard;
