@@ -46,6 +46,16 @@ A comprehensive expense management system with role-based access control, multi-
 - **Tesseract.js** for OCR
 - **Axios** for external APIs
 
+### Frontend
+- **React** 19+ with Vite
+- **React Router** for navigation
+- **Zustand** for state management
+- **Tailwind CSS** 4+ for styling
+- **React Hot Toast** for notifications
+- **Lucide React** for icons
+- **date-fns** for date formatting
+- **Axios** for API calls
+
 ### External APIs
 - RestCountries API (country/currency data)
 - ExchangeRate API (currency conversion)
@@ -107,6 +117,40 @@ npm start
 ```
 
 The backend server will run on `http://localhost:5000`
+
+### Frontend Setup
+
+1. **Navigate to frontend directory**
+```bash
+cd Expencify/frontend
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Configure environment variables**
+```bash
+# Create .env file
+cp .env.example .env
+
+# Edit .env file
+VITE_API_URL=http://localhost:5000/api
+```
+
+4. **Start the development server**
+```bash
+npm run dev
+```
+
+The frontend will run on `http://localhost:5173`
+
+5. **Build for production**
+```bash
+npm run build
+npm run preview
+```
 
 ## API Documentation
 

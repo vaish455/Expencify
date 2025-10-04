@@ -1,35 +1,76 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { useAuthStore } from './store/authStore';
+
+// Auth Pages
+import Login from './pages/auth/Login';
+import Signup from './pages/auth/Signup';
+
+// Dashboard Pages
+import AdminDashboard from './pages/admin/Dashboard';
+import ManagerDashboard from './pages/manager/Dashboard';
+import EmployeeDashboard from './pages/employee/Dashboard';
+
+// Admin Pages
+import UserManagement from './pages/admin/UserManagement';
+import ApprovalRules from './pages/admin/ApprovalRules';
+import Categories from './pages/admin/Categories';
+
+// Employee Pages
+import SubmitExpense from './pages/employee/SubmitExpense';
+import MyExpenses from './pages/employee/MyExpenses';
+
+// Manager Pages
+import PendingApprovals from './pages/manager/PendingApprovals';
+
+// Shared Pages
+import ExpenseDetails from './pages/shared/ExpenseDetails';
+
+// Layout
+import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { user } = useAuthStore();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router future={{
+      v7_startTransition: true,
+      v7_relativeSplatPath: true
+    }}>
+      <Toaster position="top-right" />
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+        <Route path="/signup" element={user ? <Navigate to="/" /> : <Signup />} />
+
+        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route index element={
+            user?.role === 'ADMIN' ? <AdminDashboard /> :
+            user?.role === 'MANAGER' ? <ManagerDashboard /> :
+            <EmployeeDashboard />
+          } />
+
+          {/* Admin Routes */}
+          <Route path="users" element={<ProtectedRoute role="ADMIN"><UserManagement /></ProtectedRoute>} />
+          <Route path="approval-rules" element={<ProtectedRoute role="ADMIN"><ApprovalRules /></ProtectedRoute>} />
+          <Route path="categories" element={<ProtectedRoute role="ADMIN"><Categories /></ProtectedRoute>} />
+
+          {/* Employee Routes */}
+          <Route path="submit-expense" element={<SubmitExpense />} />
+          <Route path="my-expenses" element={<MyExpenses />} />
+
+          {/* Manager Routes */}
+          <Route path="pending-approvals" element={<ProtectedRoute role={['ADMIN', 'MANAGER']}><PendingApprovals /></ProtectedRoute>} />
+
+          {/* Shared Routes */}
+          <Route path="expense/:id" element={<ExpenseDetails />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
+

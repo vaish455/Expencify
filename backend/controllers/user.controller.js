@@ -62,9 +62,6 @@ class UserController {
         include: {
           manager: {
             select: { id: true, name: true, email: true }
-          },
-          employees: {
-            select: { id: true, name: true, email: true }
           }
         },
         select: {
@@ -74,13 +71,13 @@ class UserController {
           role: true,
           isManagerApprover: true,
           manager: true,
-          employees: true,
           createdAt: true
         }
       });
 
       res.json({ users });
     } catch (error) {
+      console.error('Get all users error:', error);
       next(error);
     }
   }
