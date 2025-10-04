@@ -23,17 +23,28 @@ A comprehensive expense management system with role-based access control, multi-
 - Track expense status (Pending, In Progress, Approved, Rejected)
 
 ### ✅ Approval Workflows
-- **Sequential Approval**: Step-by-step approval chain
+- **Manager Priority**: Manager must approve first if `isManagerApprover` is enabled
+- **Sequential Approval**: Step-by-step approval chain with defined sequence
 - **Percentage-based**: Approve when X% of approvers agree
-- **Specific Approver**: Auto-approve if specific person approves
-- **Hybrid**: Combination of percentage and specific approver
-- Manager approval priority option
+- **Specific Approver**: Auto-approve if specific person (e.g., CFO) approves
+- **Hybrid**: Combination of percentage OR specific approver
+- **Combined Workflows**: Support both sequential AND conditional rules together
+- **Rule Priority**: Higher priority rules are evaluated first
+- **Flexible Configuration**: Mix and match different approval strategies
 
 ### 📊 Dashboard & Analytics
 - Company statistics
 - Expense tracking by category
 - Recent expense history
 - User expense reports
+
+### 📧 Email Notifications
+- Welcome email on signup
+- Login notifications
+- User creation with auto-generated password
+- Expense submission confirmations
+- Approval/rejection notifications
+- Password change alerts
 
 ## Tech Stack
 
@@ -91,6 +102,15 @@ PORT=5000
 CLOUDINARY_CLOUD_NAME="your-cloudinary-cloud-name"
 CLOUDINARY_API_KEY="your-cloudinary-api-key"
 CLOUDINARY_API_SECRET="your-cloudinary-api-secret"
+
+# Email Configuration (Gmail example)
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_PORT=587
+EMAIL_USER="your-email@gmail.com"
+EMAIL_PASSWORD="your-app-specific-password"
+EMAIL_FROM="Expencify <noreply@expencify.com>"
+
+FRONTEND_URL="http://localhost:5173"
 
 NODE_ENV="development"
 ```
@@ -185,7 +205,16 @@ Get list of all countries with currencies
 ### User Management (Admin only)
 
 #### POST /api/users
-Create new user (employee/manager)
+Create new user (employee/manager). Password is auto-generated and emailed to user.
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "role": "EMPLOYEE",
+  "managerId": "optional-manager-id",
+  "isManagerApprover": false
+}
+```
 
 #### GET /api/users
 Get all users in company
@@ -284,20 +313,34 @@ Get company statistics
 
 ## Approval Workflow Logic
 
+### Manager Approval Priority
+If `isManagerApprover` is checked for an employee, their manager MUST approve the expense first before it enters the main approval workflow.
+
 ### Sequential Approval
-Expenses go through approvers one by one in defined order.
+Expenses go through approvers one by one in defined order. Each approver must act before moving to the next.
+Example:
+- Step 1 → Manager
+- Step 2 → Finance Head  
+- Step 3 → Director
 
 ### Percentage-based Approval
-Expense is approved when X% of defined approvers approve.
+Expense is approved when X% of defined approvers approve. Example: If 3 out of 5 approvers approve (60%), expense is auto-approved.
 
 ### Specific Approver Rule
-If a specific person (e.g., CFO) approves, expense is auto-approved.
+If a specific person (e.g., CFO, CEO) approves, expense is automatically approved regardless of other approvers.
 
 ### Hybrid Rule
-Combine percentage and specific approver: approve if either condition is met.
+Combines percentage and specific approver: approve if EITHER condition is met.
+Example: Approve if (60% approve) OR (CFO approves)
 
-### Manager Approval
-If `isManagerApprover` is true, employee's manager must approve first before other rules apply.
+### Combined Workflows
+You can have BOTH sequential AND conditional rules active:
+1. Manager approves first (if enabled)
+2. Goes through sequential approvers
+3. At any point, conditional rules (percentage/specific/hybrid) can auto-approve
+
+### Rule Priority
+Multiple rules can exist. Higher priority rules are checked first. This allows for complex approval hierarchies.
 
 ## Security Features
 

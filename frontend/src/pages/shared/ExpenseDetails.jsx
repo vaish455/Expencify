@@ -159,42 +159,85 @@ const ExpenseDetails = () => {
 
         {expense.approvalActions && expense.approvalActions.length > 0 && (
           <div className="border-t border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Approval History</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Approval Workflow</h3>
+            
+            {/* Manager Approval Section */}
+            {expense.user.isManagerApprover && (
+              <div className="mb-6 bg-purple-50 p-4 rounded-lg">
+                <h4 className="font-medium text-purple-900 mb-3 flex items-center">
+                  <User className="w-5 h-5 mr-2" />
+                  Manager Approval
+                </h4>
+                {expense.approvalActions
+                  .filter(action => action.stepIndex === -1)
+                  .map(action => (
+                    <div key={action.id} className="flex items-start space-x-3 p-3 bg-white rounded-lg">
+                      <div className={`p-2 rounded-full ${
+                        action.status === 'APPROVED' ? 'bg-green-100' : 'bg-red-100'
+                      }`}>
+                        {action.status === 'APPROVED' ? (
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-600" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium text-gray-900">{action.approver.name}</p>
+                            <p className="text-sm text-gray-600">{action.status}</p>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            {format(new Date(action.createdAt), 'MMM dd, yyyy HH:mm')}
+                          </p>
+                        </div>
+                        {action.comments && (
+                          <p className="text-sm text-gray-600 mt-2 italic">"{action.comments}"</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            {/* Regular Approval Workflow */}
             <div className="space-y-3">
-              {expense.approvalActions.map((action, index) => (
-                <div key={action.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className={`p-2 rounded-full ${
-                    action.status === 'APPROVED' ? 'bg-green-100' :
-                    action.status === 'REJECTED' ? 'bg-red-100' :
-                    'bg-yellow-100'
-                  }`}>
-                    {action.status === 'APPROVED' ? (
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                    ) : action.status === 'REJECTED' ? (
-                      <XCircle className="w-5 h-5 text-red-600" />
-                    ) : (
-                      <Clock className="w-5 h-5 text-yellow-600" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-gray-900">{action.approver.name}</p>
-                        <p className="text-sm text-gray-600">
-                          {action.status === 'APPROVED' ? 'Approved' : 
-                           action.status === 'REJECTED' ? 'Rejected' : 'Pending'}
+              {expense.approvalActions
+                .filter(action => action.stepIndex >= 0)
+                .map((action, index) => (
+                  <div key={action.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className={`p-2 rounded-full ${
+                      action.status === 'APPROVED' ? 'bg-green-100' :
+                      action.status === 'REJECTED' ? 'bg-red-100' :
+                      'bg-yellow-100'
+                    }`}>
+                      {action.status === 'APPROVED' ? (
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      ) : action.status === 'REJECTED' ? (
+                        <XCircle className="w-5 h-5 text-red-600" />
+                      ) : (
+                        <Clock className="w-5 h-5 text-yellow-600" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-gray-900">{action.approver.name}</p>
+                          <p className="text-sm text-gray-600">
+                            {action.approver.role} • {action.status === 'APPROVED' ? 'Approved' : 
+                             action.status === 'REJECTED' ? 'Rejected' : 'Pending'}
+                          </p>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {action.status !== 'PENDING' && format(new Date(action.createdAt), 'MMM dd, yyyy HH:mm')}
                         </p>
                       </div>
-                      <p className="text-xs text-gray-500">
-                        {format(new Date(action.createdAt), 'MMM dd, yyyy HH:mm')}
-                      </p>
+                      {action.comments && (
+                        <p className="text-sm text-gray-600 mt-2 italic">"{action.comments}"</p>
+                      )}
                     </div>
-                    {action.comments && (
-                      <p className="text-sm text-gray-600 mt-2 italic">"{action.comments}"</p>
-                    )}
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         )}

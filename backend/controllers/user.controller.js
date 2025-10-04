@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { validationResult } from 'express-validator';
 import prisma from '../config/database.js';
+import emailService from '../utils/emailService.js';
 
 class UserController {
   async createUser(req, res, next) {
@@ -10,14 +11,16 @@ class UserController {
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const { name, email, password, role, managerId, isManagerApprover } = req.body;
+      const { name, email, role, managerId, isManagerApprover } = req.body;
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
         return res.status(409).json({ error: 'Email already exists' });
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+      // Generate random password
+      const generatedPassword = emailService.generateRandomPassword();
+      const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
       const user = await prisma.user.create({
         data: {
@@ -35,8 +38,16 @@ class UserController {
         }
       });
 
+      // Send email with credentials (async, don't wait)
+      emailService.sendUserCreatedEmail(
+        user,
+        generatedPassword,
+        user.company,
+        req.user
+      ).catch(err => console.error('Failed to send user created email:', err));
+
       res.status(201).json({
-        message: 'User created successfully',
+        message: 'User created successfully. Credentials sent via email.',
         user: {
           id: user.id,
           name: user.name,

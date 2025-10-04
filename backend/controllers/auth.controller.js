@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
 import prisma from '../config/database.js';
 import currencyService from '../utils/currencyService.js';
+import emailService from '../utils/emailService.js';
 
 class AuthController {
   async signup(req, res, next) {
@@ -78,6 +79,10 @@ class AuthController {
         { expiresIn: process.env.JWT_EXPIRES_IN }
       );
 
+      // Send welcome email (async, don't wait)
+      emailService.sendWelcomeEmail(result, result.company)
+        .catch(err => console.error('Failed to send welcome email:', err));
+
       res.status(201).json({
         message: 'User and company created successfully',
         token,
@@ -122,6 +127,10 @@ class AuthController {
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN }
       );
+
+      // Send login notification (async, don't wait)
+      emailService.sendLoginNotification(user)
+        .catch(err => console.error('Failed to send login notification:', err));
 
       res.json({
         message: 'Login successful',
