@@ -32,7 +32,7 @@ const Login = () => {
       <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <DollarSign className="w-16 h-16 text-blue-600" />
+            <DollarSign className="w-16 h-16" style={{ color: '#714B67' }} />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Expencify</h2>
           <p className="text-gray-600 mt-2">Sign in to your account</p>
@@ -48,7 +48,7 @@ const Login = () => {
               <input
                 type="email"
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                 placeholder="john@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -65,7 +65,7 @@ const Login = () => {
               <input
                 type="password"
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -76,7 +76,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="w-full btn-primary py-2 px-4 focus:outline-none focus:ring-2 ring-primary focus:ring-offset-2 font-medium"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
@@ -84,7 +84,7 @@ const Login = () => {
 
         <p className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{' '}
-          <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+          <Link to="/signup" className="text-primary hover:text-primary font-medium">
             Sign up
           </Link>
         </p>

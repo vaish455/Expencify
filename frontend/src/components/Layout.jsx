@@ -64,7 +64,7 @@ const Layout = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <DollarSign className="w-8 h-8 text-blue-600" />
+              <DollarSign className="w-8 h-8" style={{ color: '#714B67' }} />
               <span className="ml-2 text-xl font-bold text-gray-900">Expencify</span>
             </div>
             <div className="flex items-center space-x-4">
@@ -90,7 +90,7 @@ const Layout = () => {
               <Link
                 key={item.to}
                 to={item.to}
-                className="group flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700 hover:bg-blue-50 hover:text-blue-600 mb-1"
+                className="group flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-700 hover:bg-primary-50 hover:text-primary mb-1"
               >
                 <item.icon className="mr-3 h-5 w-5" />
                 {item.label}

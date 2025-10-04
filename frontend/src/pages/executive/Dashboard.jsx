@@ -32,7 +32,7 @@ const ExecutiveDashboard = () => {
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 loading-spinner"></div>
     </div>;
   }
 
@@ -57,7 +57,7 @@ const ExecutiveDashboard = () => {
               <p className="text-sm text-gray-600">My Expenses</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">{myExpenses.length}</p>
             </div>
-            <FileText className="w-8 h-8 text-blue-600" />
+            <FileText className="w-8 h-8" style={{ color: '#714B67' }} />
           </div>
         </div>
 
@@ -103,7 +103,7 @@ const ExecutiveDashboard = () => {
               ))
             )}
             {pendingApprovals.length > 0 && (
-              <Link to="/pending-approvals" className="block text-center text-blue-600 hover:text-blue-700 font-medium">
+              <Link to="/pending-approvals" className="block text-center text-primary hover:text-primary font-medium">
                 View All
               </Link>
             )}
@@ -144,7 +144,7 @@ const ExecutiveDashboard = () => {
               ))
             )}
             {myExpenses.length > 0 && (
-              <Link to="/my-expenses" className="block text-center text-blue-600 hover:text-blue-700 font-medium">
+              <Link to="/my-expenses" className="block text-center text-primary hover:text-primary font-medium">
                 View All
               </Link>
             )}

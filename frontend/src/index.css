@@ -1,1 +1,48 @@
 @import "tailwindcss";
+
+/* Custom button styles */
+.btn-primary {
+  background-color: #714B67;
+  color: white;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #5a3a52;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.text-primary {
+  color: #714B67;
+}
+
+.text-primary:hover {
+  color: #5a3a52;
+}
+
+.bg-primary-50 {
+  background-color: #f5f3f4;
+}
+
+.bg-primary-100 {
+  background-color: #ebe7e9;
+}
+
+.border-primary {
+  border-color: #714B67;
+}
+
+.ring-primary {
+  --tw-ring-color: #714B67;
+}
+
+.loading-spinner {
+  border-color: #714B67;
+}

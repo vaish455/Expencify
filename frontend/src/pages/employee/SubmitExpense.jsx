@@ -126,7 +126,7 @@ const SubmitExpense = () => {
                     type="button"
                     onClick={handleOCRScan}
                     disabled={ocrLoading}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center space-x-2 disabled:opacity-50"
+                    className="btn-primary flex items-center space-x-2 disabled:opacity-50"
                   >
                     <Camera className="w-5 h-5" />
                     <span>{ocrLoading ? 'Scanning...' : 'Scan with OCR'}</span>
@@ -168,7 +168,7 @@ const SubmitExpense = () => {
             <input
               type="text"
               required
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
               placeholder="e.g., Team lunch at restaurant"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -189,7 +189,7 @@ const SubmitExpense = () => {
                 required
                 step="0.01"
                 min="0"
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                 placeholder="0.00"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
@@ -204,7 +204,7 @@ const SubmitExpense = () => {
             </label>
             <select
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
               value={formData.currency}
               onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
             >
@@ -226,7 +226,7 @@ const SubmitExpense = () => {
               <input
                 type="date"
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                 value={formData.expenseDate}
                 onChange={(e) => setFormData({ ...formData, expenseDate: e.target.value })}
               />
@@ -242,7 +242,7 @@ const SubmitExpense = () => {
               <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <select
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                 value={formData.categoryId}
                 onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
               >
@@ -261,7 +261,7 @@ const SubmitExpense = () => {
           </label>
           <select
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
             value={formData.paidBy}
             onChange={(e) => setFormData({ ...formData, paidBy: e.target.value })}
           >
@@ -278,7 +278,7 @@ const SubmitExpense = () => {
           </label>
           <textarea
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
             placeholder="Additional notes or comments..."
             value={formData.remarks}
             onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
@@ -296,7 +296,7 @@ const SubmitExpense = () => {
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="btn-primary px-6 py-2 disabled:opacity-50"
           >
             {loading ? 'Submitting...' : 'Submit Expense'}
           </button>

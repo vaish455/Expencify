@@ -97,7 +97,7 @@ const UserManagement = () => {
 
   if (loading && !showModal) {
     return <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 loading-spinner"></div>
     </div>;
   }
 
@@ -107,7 +107,7 @@ const UserManagement = () => {
         <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
         <button
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2"
         >
           <UserPlus className="w-5 h-5" />
           <span>Add User</span>
@@ -140,8 +140,8 @@ const UserManagement = () => {
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <UsersIcon className="h-5 w-5 text-blue-600" />
+                    <div className="flex-shrink-0 h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center">
+                      <UsersIcon className="h-5 w-5 text-primary" />
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">{user.name}</div>
@@ -205,7 +205,7 @@ const UserManagement = () => {
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
@@ -217,7 +217,7 @@ const UserManagement = () => {
                   type="email"
                   required
                   disabled={editingUser}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
@@ -229,7 +229,7 @@ const UserManagement = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
                 <select
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 >
@@ -246,7 +246,7 @@ const UserManagement = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Manager</label>
                 <select
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                   value={formData.managerId}
                   onChange={(e) => setFormData({ ...formData, managerId: e.target.value })}
                 >
@@ -261,7 +261,7 @@ const UserManagement = () => {
                 <input
                   type="checkbox"
                   id="isManagerApprover"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                   checked={formData.isManagerApprover}
                   onChange={(e) => setFormData({ ...formData, isManagerApprover: e.target.checked })}
                 />
@@ -281,7 +281,7 @@ const UserManagement = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="btn-primary"
                 >
                   {loading ? 'Saving...' : editingUser ? 'Update' : 'Create'}
                 </button>
