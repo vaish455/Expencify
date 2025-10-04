@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -12,4 +9,165 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum ExpenseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+}
+
+enum ApprovalRuleType {
+  SEQUENTIAL
+  PERCENTAGE
+  SPECIFIC_APPROVER
+  HYBRID
+}
+
+model Company {
+  id              String   @id @default(uuid())
+  name            String
+  country         String
+  currency        String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  users           User[]
+  expenses        Expense[]
+  approvalRules   ApprovalRule[]
+  categories      Category[]
+}
+
+model User {
+  id                    String   @id @default(uuid())
+  email                 String   @unique
+  name                  String
+  password              String
+  role                  Role     @default(EMPLOYEE)
+  companyId             String
+  managerId             String?
+  isManagerApprover     Boolean  @default(false)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  company               Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  manager               User?    @relation("ManagerEmployee", fields: [managerId], references: [id])
+  employees             User[]   @relation("ManagerEmployee")
+  
+  expenses              Expense[]
+  approvalSteps         ApprovalStep[]
+  approvalActions       ApprovalAction[]
+  
+  @@index([companyId])
+  @@index([managerId])
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  companyId   String
+  createdAt   DateTime @default(now())
+  
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses    Expense[]
+  
+  @@unique([name, companyId])
+  @@index([companyId])
+}
+
+model Expense {
+  id                String         @id @default(uuid())
+  description       String
+  amount            Float
+  currency          String
+  amountInCompanyCurrency Float?
+  expenseDate       DateTime
+  paidBy            String
+  remarks           String?
+  receiptUrl        String?
+  status            ExpenseStatus  @default(PENDING)
+  categoryId        String
+  userId            String
+  companyId         String
+  currentStepIndex  Int            @default(0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  
+  category          Category       @relation(fields: [categoryId], references: [id])
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company           Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  approvalActions   ApprovalAction[]
+  ocrData           OcrData?
+  
+  @@index([userId])
+  @@index([companyId])
+  @@index([status])
+}
+
+model OcrData {
+  id              String   @id @default(uuid())
+  expenseId       String   @unique
+  merchantName    String?
+  extractedAmount Float?
+  extractedDate   DateTime?
+  rawText         String?
+  confidence      Float?
+  createdAt       DateTime @default(now())
+  
+  expense         Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+}
+
+model ApprovalRule {
+  id              String           @id @default(uuid())
+  name            String
+  type            ApprovalRuleType
+  companyId       String
+  percentageRequired Float?
+  specificApproverId String?
+  isActive        Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  steps           ApprovalStep[]
+  
+  @@index([companyId])
+}
+
+model ApprovalStep {
+  id              String       @id @default(uuid())
+  approvalRuleId  String
+  approverId      String
+  sequence        Int
+  createdAt       DateTime     @default(now())
+  
+  approvalRule    ApprovalRule @relation(fields: [approvalRuleId], references: [id], onDelete: Cascade)
+  approver        User         @relation(fields: [approverId], references: [id])
+  
+  @@unique([approvalRuleId, sequence])
+  @@index([approvalRuleId])
+}
+
+model ApprovalAction {
+  id          String         @id @default(uuid())
+  expenseId   String
+  approverId  String
+  status      ExpenseStatus
+  comments    String?
+  stepIndex   Int
+  createdAt   DateTime       @default(now())
+  
+  expense     Expense        @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  approver    User           @relation(fields: [approverId], references: [id])
+  
+  @@index([expenseId])
+  @@index([approverId])
 }
