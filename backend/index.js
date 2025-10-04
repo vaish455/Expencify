@@ -43,8 +43,20 @@ app.use((err, req, res, next) => {
   console.error('Error details:', {
     message: err.message,
     stack: err.stack,
-    path: req.path
+    path: req.path,
+    body: req.body,
+    params: req.params,
+    name: err.name
   });
+  
+  // Handle Prisma errors
+  if (err.code === 'P2002') {
+    return res.status(400).json({ error: 'A record with this information already exists' });
+  }
+  if (err.code === 'P2025') {
+    return res.status(404).json({ error: 'Record not found' });
+  }
+  
   errorHandler(err, req, res, next);
 });
 
