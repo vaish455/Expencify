@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
-import { FileText, CheckCircle, Clock, TrendingUp } from 'lucide-react';
 
 const ManagerDashboard = () => {
   const { user } = useAuthStore();
@@ -41,35 +40,32 @@ const ManagerDashboard = () => {
       <h1 className="text-2xl font-bold text-gray-900">Manager Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Pending Approvals</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{pendingApprovals.length}</p>
-            </div>
-            <Clock className="w-8 h-8 text-yellow-600" />
+        <div className="card p-6">
+          <p className="text-sm font-medium text-gray-600 mb-2">Pending Approvals</p>
+          <p className="text-4xl font-bold text-gray-900">{pendingApprovals.length}</p>
+          <div className="mt-4 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-yellow-500 to-yellow-600 transition-all" style={{ width: '60%' }}></div>
           </div>
         </div>
 
-        <div className="card p-6 hover:shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">My Expenses</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{myExpenses.length}</p>
-            </div>
-            <FileText className="w-8 h-8" style={{ color: '#714B67' }} />
+        <div className="card p-6">
+          <p className="text-sm font-medium text-gray-600 mb-2">My Expenses</p>
+          <p className="text-4xl font-bold text-gray-900">{myExpenses.length}</p>
+          <div className="mt-4 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+            <div className="h-full rounded-full transition-all" style={{ 
+              width: '75%',
+              background: 'linear-gradient(90deg, #5a3a52 0%, #875A7B 100%)'
+            }}></div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Approved</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {myExpenses.filter(e => e.status === 'APPROVED').length}
-              </p>
-            </div>
-            <CheckCircle className="w-8 h-8 text-green-600" />
+        <div className="card p-6">
+          <p className="text-sm font-medium text-gray-600 mb-2">Total Approved</p>
+          <p className="text-4xl font-bold text-gray-900">
+            {myExpenses.filter(e => e.status === 'APPROVED').length}
+          </p>
+          <div className="mt-4 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-green-500 to-green-600 transition-all" style={{ width: '85%' }}></div>
           </div>
         </div>
       </div>
@@ -152,6 +148,10 @@ const ManagerDashboard = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+export default ManagerDashboard;
   );
 };
 

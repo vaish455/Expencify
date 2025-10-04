@@ -43,7 +43,7 @@ const AdminDashboard = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#714B67] to-[#017E84] bg-clip-text text-transparent mb-2">Admin Dashboard</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#5a3a52] to-[#017E84] bg-clip-text text-transparent mb-2">Admin Dashboard</h1>
           <p className="text-gray-600 font-medium">Complete overview of your organization</p>
         </div>
         <div className="text-right">
@@ -63,22 +63,6 @@ const AdminDashboard = () => {
                   <span>↗</span>
                   <span>+12% from last month</span>
                 </div>
-              </div>
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{
-                background: stat.color === 'blue' ? 'linear-gradient(135deg, #E6F7F8 0%, #B3E5E8 100%)' :
-                            stat.color === 'purple' ? 'linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%)' :
-                            stat.color === 'yellow' ? 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)' :
-                            stat.color === 'green' ? 'linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%)' :
-                            stat.color === 'red' ? 'linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%)' : 
-                            'linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%)'
-              }}>
-                <stat.icon className="w-10 h-10" style={{
-                  color: stat.color === 'blue' ? '#017E84' :
-                         stat.color === 'purple' ? '#8B5CF6' :
-                         stat.color === 'yellow' ? '#D97706' :
-                         stat.color === 'green' ? '#059669' :
-                         stat.color === 'red' ? '#DC2626' : '#6366F1'
-                }} />
               </div>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
@@ -100,11 +84,11 @@ const AdminDashboard = () => {
         <div className="card overflow-hidden">
           <div className="p-6 border-b-2" style={{ 
             background: 'linear-gradient(135deg, #F5F3F4 0%, #EBE7E9 100%)',
-            borderColor: '#714B67'
+            borderColor: '#5a3a52'
           }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md" style={{ background: 'linear-gradient(135deg, #714B67 0%, #875A7B 100%)' }}>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md" style={{ background: 'linear-gradient(135deg, #5a3a52 0%, #875A7B 100%)' }}>
                   <FileText className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -118,8 +102,10 @@ const AdminDashboard = () => {
             {statistics?.expensesByCategory?.map((item, index) => (
               <div key={index} className="flex justify-between items-center p-4 rounded-xl hover:shadow-md transition-all" style={{ backgroundColor: '#FAFAFA' }}>
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm" style={{ background: 'linear-gradient(135deg, #E6F7F8 0%, #B3E5E8 100%)' }}>
-                    📊
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm" style={{ background: 'linear-gradient(135deg, #E6F7F8 0%, #B3E5E8 100%)' }}>
+                    <svg className="w-6 h-6" style={{ color: '#017E84' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
                   </div>
                   <div>
                     <span className="font-bold text-gray-900">{item.category}</span>
@@ -169,7 +155,7 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   <div className="text-right ml-4">
-                    <p className="font-bold text-xl" style={{ color: '#714B67' }}>${expense.amountInCompanyCurrency?.toFixed(2)}</p>
+                    <p className="font-bold text-xl" style={{ color: '#5a3a52' }}>${expense.amountInCompanyCurrency?.toFixed(2)}</p>
                     <span className={`text-xs px-3 py-1.5 rounded-full font-bold ${
                       expense.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
                       expense.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
