@@ -69,7 +69,7 @@ const MyExpenses = () => {
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 loading-spinner"></div>
     </div>;
   }
 
@@ -79,7 +79,7 @@ const MyExpenses = () => {
         <h1 className="text-2xl font-bold text-gray-900">My Expenses</h1>
         <Link
           to="/submit-expense"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          className="btn-primary"
         >
           Submit New Expense
         </Link>
@@ -92,14 +92,14 @@ const MyExpenses = () => {
             <input
               type="text"
               placeholder="Search expenses..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
 
           <select
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
           >
@@ -112,7 +112,7 @@ const MyExpenses = () => {
 
           <input
             type="date"
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
             value={filters.startDate}
             onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
             placeholder="Start Date"
@@ -120,7 +120,7 @@ const MyExpenses = () => {
 
           <input
             type="date"
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
             value={filters.endDate}
             onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
             placeholder="End Date"
@@ -191,7 +191,7 @@ const MyExpenses = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <Link
                         to={`/expense/${expense.id}`}
-                        className="text-blue-600 hover:text-blue-900"
+                        className="text-primary hover:text-primary"
                       >
                         View Details
                       </Link>

@@ -26,7 +26,7 @@ const AdminDashboard = () => {
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 loading-spinner"></div>
     </div>;
   }
 
@@ -53,8 +53,20 @@ const AdminDashboard = () => {
                 <p className="text-sm text-gray-600">{stat.label}</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
               </div>
-              <div className={`p-3 rounded-lg bg-${stat.color}-100`}>
-                <stat.icon className={`w-6 h-6 text-${stat.color}-600`} />
+              <div className="p-3 rounded-lg" style={{
+                backgroundColor: stat.color === 'blue' ? '#ebe7e9' :
+                                stat.color === 'purple' ? '#f3e8ff' :
+                                stat.color === 'yellow' ? '#fef3c7' :
+                                stat.color === 'green' ? '#d1fae5' :
+                                stat.color === 'red' ? '#fee2e2' : '#e0e7ff'
+              }}>
+                <stat.icon className="w-6 h-6" style={{
+                  color: stat.color === 'blue' ? '#714B67' :
+                         stat.color === 'purple' ? '#8b5cf6' :
+                         stat.color === 'yellow' ? '#d97706' :
+                         stat.color === 'green' ? '#059669' :
+                         stat.color === 'red' ? '#dc2626' : '#4f46e5'
+                }} />
               </div>
             </div>
           </div>

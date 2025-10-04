@@ -54,7 +54,7 @@ const PendingApprovals = () => {
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 loading-spinner"></div>
     </div>;
   }
 
@@ -127,7 +127,7 @@ const PendingApprovals = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                     <Link
                       to={`/expense/${expense.id}`}
-                      className="text-blue-600 hover:text-blue-900 inline-flex items-center space-x-1"
+                      className="text-primary hover:text-primary inline-flex items-center space-x-1"
                     >
                       <Eye className="w-4 h-4" />
                       <span>View</span>
@@ -179,7 +179,7 @@ const PendingApprovals = () => {
               </label>
               <textarea
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                 placeholder="Add comments..."
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
@@ -197,7 +197,7 @@ const PendingApprovals = () => {
                 disabled={processingId === selectedExpense.id}
                 className={`px-4 py-2 rounded-lg text-white disabled:opacity-50 ${
                   selectedExpense.approvalStatus === 'APPROVED'
-                    ? 'bg-green-600 hover:bg-green-700'
+                    ? 'btn-primary'
                     : 'bg-red-600 hover:bg-red-700'
                 }`}
               >

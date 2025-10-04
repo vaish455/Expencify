@@ -68,7 +68,7 @@ const Categories = () => {
 
   if (loading && !showModal) {
     return <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 loading-spinner"></div>
     </div>;
   }
 
@@ -78,7 +78,7 @@ const Categories = () => {
         <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
         <button
           onClick={() => { setEditingCategory(null); setCategoryName(''); setShowModal(true); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2"
         >
           <Plus className="w-5 h-5" />
           <span>Add Category</span>
@@ -90,8 +90,8 @@ const Categories = () => {
           <div key={category.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Tag className="w-6 h-6 text-blue-600" />
+                <div className="p-2 bg-primary-100 rounded-lg">
+                  <Tag className="w-6 h-6 text-primary" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
@@ -100,7 +100,7 @@ const Categories = () => {
               <div className="flex space-x-2">
                 <button
                   onClick={() => openEditModal(category)}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                  className="p-2 text-primary hover:bg-primary-50 rounded-lg"
                 >
                   <Edit className="w-5 h-5" />
                 </button>
@@ -130,7 +130,7 @@ const Categories = () => {
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                   value={categoryName}
                   onChange={(e) => setCategoryName(e.target.value)}
                   placeholder="e.g., Travel, Food, Entertainment"
@@ -148,7 +148,7 @@ const Categories = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="btn-primary disabled:opacity-50"
                 >
                   {loading ? 'Saving...' : editingCategory ? 'Update' : 'Create'}
                 </button>

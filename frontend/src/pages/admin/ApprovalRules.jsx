@@ -124,7 +124,7 @@ const ApprovalRules = () => {
 
   if (loading && !showModal) {
     return <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 loading-spinner"></div>
     </div>;
   }
 
@@ -134,7 +134,7 @@ const ApprovalRules = () => {
         <h1 className="text-2xl font-bold text-gray-900">Approval Rules</h1>
         <button
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2"
         >
           <Plus className="w-5 h-5" />
           <span>Add Approval Rule</span>
@@ -147,7 +147,7 @@ const ApprovalRules = () => {
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center space-x-3 mb-2">
-                  <CheckSquare className="w-6 h-6 text-blue-600" />
+                  <CheckSquare className="w-6 h-6 text-primary" />
                   <h3 className="text-lg font-semibold text-gray-900">{rule.name}</h3>
                   <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
                     rule.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
@@ -230,7 +230,7 @@ const ApprovalRules = () => {
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Standard Approval Flow"
@@ -240,7 +240,7 @@ const ApprovalRules = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Approval Type</label>
                 <select
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                 >
@@ -260,7 +260,7 @@ const ApprovalRules = () => {
                     type="number"
                     min="1"
                     max="100"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                     value={formData.percentageRequired}
                     onChange={(e) => setFormData({ ...formData, percentageRequired: parseInt(e.target.value) })}
                   />
@@ -273,7 +273,7 @@ const ApprovalRules = () => {
                     Specific Approver
                   </label>
                   <select
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                     value={formData.specificApproverId}
                     onChange={(e) => setFormData({ ...formData, specificApproverId: e.target.value })}
                   >
@@ -290,7 +290,7 @@ const ApprovalRules = () => {
                 <input
                   type="number"
                   min="0"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })}
                 />
@@ -301,7 +301,7 @@ const ApprovalRules = () => {
                 <input
                   type="checkbox"
                   id="requiresManagerFirst"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                   checked={formData.requiresManagerFirst}
                   onChange={(e) => setFormData({ ...formData, requiresManagerFirst: e.target.checked })}
                 />
@@ -316,7 +316,7 @@ const ApprovalRules = () => {
                   <button
                     type="button"
                     onClick={addStep}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    className="text-primary hover:text-primary text-sm font-medium"
                   >
                     + Add Step
                   </button>
@@ -327,7 +327,7 @@ const ApprovalRules = () => {
                       <span className="text-sm font-medium text-gray-600 w-16">Step {index + 1}</span>
                       <select
                         required
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
                         value={step.approverId}
                         onChange={(e) => updateStep(index, e.target.value)}
                       >
@@ -362,7 +362,7 @@ const ApprovalRules = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="btn-primary"
                 >
                   {loading ? 'Saving...' : editingRule ? 'Update' : 'Create'}
                 </button>

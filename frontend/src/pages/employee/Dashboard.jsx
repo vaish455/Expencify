@@ -34,7 +34,7 @@ const EmployeeDashboard = () => {
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 loading-spinner"></div>
     </div>;
   }
 
@@ -44,7 +44,7 @@ const EmployeeDashboard = () => {
         <h1 className="text-2xl font-bold text-gray-900">My Expenses</h1>
         <Link
           to="/submit-expense"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2"
         >
           <PlusCircle className="w-5 h-5" />
           <span>Submit Expense</span>
@@ -59,8 +59,16 @@ const EmployeeDashboard = () => {
                 <p className="text-sm text-gray-600">{stat.label}</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
               </div>
-              <div className={`p-3 rounded-lg bg-${stat.color}-100`}>
-                <stat.icon className={`w-6 h-6 text-${stat.color}-600`} />
+              <div className="p-3 rounded-lg" style={{
+                backgroundColor: stat.color === 'blue' ? '#ebe7e9' : 
+                                stat.color === 'yellow' ? '#fef3c7' :
+                                stat.color === 'green' ? '#d1fae5' : '#fee2e2'
+              }}>
+                <stat.icon className="w-6 h-6" style={{
+                  color: stat.color === 'blue' ? '#714B67' :
+                         stat.color === 'yellow' ? '#d97706' :
+                         stat.color === 'green' ? '#059669' : '#dc2626'
+                }} />
               </div>
             </div>
           </div>
@@ -78,7 +86,7 @@ const EmployeeDashboard = () => {
               <p className="text-gray-500 mb-4">No expenses submitted yet</p>
               <Link
                 to="/submit-expense"
-                className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                className="inline-flex items-center space-x-2 btn-primary"
               >
                 <PlusCircle className="w-5 h-5" />
                 <span>Submit Your First Expense</span>
@@ -114,7 +122,7 @@ const EmployeeDashboard = () => {
                 </Link>
               ))}
               {expenses.length > 10 && (
-                <Link to="/my-expenses" className="block text-center text-blue-600 hover:text-blue-700 font-medium py-2">
+                <Link to="/my-expenses" className="block text-center text-primary hover:text-primary font-medium py-2">
                   View All Expenses
                 </Link>
               )}
