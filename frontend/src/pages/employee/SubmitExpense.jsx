@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
-import { Upload, Camera, DollarSign, Calendar, FileText, Tag } from 'lucide-react';
+import { Upload, Camera, DollarSign, Calendar, FileText, Tag, ArrowLeft } from 'lucide-react';
 
 const SubmitExpense = () => {
   const { user } = useAuthStore();
@@ -11,7 +11,7 @@ const SubmitExpense = () => {
   const [loading, setLoading] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [currencies, setCurrencies] = useState(['USD', 'EUR', 'GBP', 'INR', 'JPY', 'AUD', 'CAD']);
+  const [currencies] = useState(['USD', 'EUR', 'GBP', 'INR', 'JPY', 'AUD', 'CAD']);
   const [receipt, setReceipt] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   
@@ -36,7 +36,7 @@ const SubmitExpense = () => {
       if (data.categories.length > 0) {
         setFormData(prev => ({ ...prev, categoryId: data.categories[0].id }));
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to load categories');
     }
   };
@@ -74,8 +74,8 @@ const SubmitExpense = () => {
           ? new Date(data.data.extractedDate).toISOString().split('T')[0]
           : prev.expenseDate
       }));
-    } catch (error) {
-      toast.error('Failed to scan receipt');
+    } catch {
+      toast.error('Failed to parse receipt. Please fill details manually.');
     } finally {
       setOcrLoading(false);
     }
@@ -108,28 +108,43 @@ const SubmitExpense = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Submit Expense</h1>
+    <div className="max-w-3xl mx-auto space-y-6 animate-slide-up">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 -ml-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Submit Expense</h1>
+          <p className="text-sm text-slate-500 mt-1">Upload receipt and enter details for reimbursement.</p>
+        </div>
+      </div>
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="card-premium p-6 sm:p-8 space-y-8">
         {/* Receipt Upload */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Receipt Upload
+          <label className="label-text">
+            Receipt Upload <span className="text-slate-400 font-normal">(Optional but recommended)</span>
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+          <div className="mt-2 border-2 border-dashed border-slate-300 rounded-xl p-8 hover:bg-slate-50 transition-colors bg-white group">
             {previewUrl ? (
-              <div className="space-y-4">
-                <img src={previewUrl} alt="Receipt" className="max-h-64 mx-auto rounded" />
-                <div className="flex justify-center space-x-4">
+              <div className="space-y-6">
+                <img src={previewUrl} alt="Receipt" className="max-h-64 mx-auto rounded-lg shadow-sm" />
+                <div className="flex justify-center flex-wrap gap-4">
                   <button
                     type="button"
                     onClick={handleOCRScan}
                     disabled={ocrLoading}
-                    className="btn-primary flex items-center space-x-2 disabled:opacity-50"
+                    className="btn-primary flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    <Camera className="w-5 h-5" />
-                    <span>{ocrLoading ? 'Scanning...' : 'Scan with OCR'}</span>
+                    {ocrLoading ? (
+                      <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                    ) : (
+                      <Camera className="w-4 h-4" />
+                    )}
+                    <span>{ocrLoading ? 'Scanning receipt...' : 'Auto-fill with AI scan'}</span>
                   </button>
                   <button
                     type="button"
@@ -137,16 +152,19 @@ const SubmitExpense = () => {
                       setReceipt(null);
                       setPreviewUrl(null);
                     }}
-                    className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                    className="btn-secondary"
                   >
                     Remove
                   </button>
                 </div>
               </div>
             ) : (
-              <label className="cursor-pointer block text-center">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                <span className="text-sm text-gray-600">Click to upload receipt</span>
+              <label className="cursor-pointer flex flex-col items-center">
+                <div className="w-14 h-14 bg-indigo-50 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <Upload className="w-6 h-6 text-indigo-600" />
+                </div>
+                <span className="text-sm font-semibold text-indigo-600 mb-1">Click to upload</span>
+                <span className="text-xs text-slate-500">PDF, PNG, JPG (max 5MB)</span>
                 <input
                   type="file"
                   className="hidden"
@@ -158,38 +176,41 @@ const SubmitExpense = () => {
           </div>
         </div>
 
-        {/* Description */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description *
-          </label>
-          <div className="relative">
-            <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              required
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
-              placeholder="e.g., Team lunch at restaurant"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            />
-          </div>
-        </div>
+        <hr className="border-slate-100" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Amount */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Amount *
+        {/* Details Form Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+          <div className="md:col-span-2">
+            <label className="label-text">
+              Description *
             </label>
-            <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <div className="relative mt-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FileText className="w-5 h-5 text-slate-400" />
+              </div>
+              <input
+                type="text"
+                required
+                className="input-field !pl-10"
+                placeholder="e.g., Client dinner at Italian restaurant"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="label-text">Amount *</label>
+            <div className="relative mt-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <DollarSign className="w-5 h-5 text-slate-400" />
+              </div>
               <input
                 type="number"
                 required
                 step="0.01"
                 min="0"
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                className="input-field !pl-10 font-medium"
                 placeholder="0.00"
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
@@ -197,14 +218,11 @@ const SubmitExpense = () => {
             </div>
           </div>
 
-          {/* Currency */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Currency *
-            </label>
+            <label className="label-text">Currency *</label>
             <select
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+              className="input-field mt-1"
               value={formData.currency}
               onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
             >
@@ -213,36 +231,32 @@ const SubmitExpense = () => {
               ))}
             </select>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Expense Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Expense Date *
-            </label>
-            <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <label className="label-text">Date incurred *</label>
+            <div className="relative mt-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Calendar className="w-5 h-5 text-slate-400" />
+              </div>
               <input
                 type="date"
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                className="input-field !pl-10"
                 value={formData.expenseDate}
                 onChange={(e) => setFormData({ ...formData, expenseDate: e.target.value })}
               />
             </div>
           </div>
 
-          {/* Category */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category *
-            </label>
-            <div className="relative">
-              <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <label className="label-text">Category *</label>
+            <div className="relative mt-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Tag className="w-5 h-5 text-slate-400" />
+              </div>
               <select
                 required
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
+                className="input-field !pl-10"
                 value={formData.categoryId}
                 onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
               >
@@ -252,53 +266,54 @@ const SubmitExpense = () => {
               </select>
             </div>
           </div>
+
+          <div>
+            <label className="label-text">Payment Method *</label>
+            <select
+              required
+              className="input-field mt-1"
+              value={formData.paidBy}
+              onChange={(e) => setFormData({ ...formData, paidBy: e.target.value })}
+            >
+              <option value="Personal">Personal Card/Cash (Reimbursable)</option>
+              <option value="Corporate Card">Corporate Card (Non-reimbursable)</option>
+              <option value="Cash">Petty Cash</option>
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="label-text">Additional Remarks</label>
+            <textarea
+              rows={3}
+              className="input-field mt-1 resize-none"
+              placeholder="Any context the approver should know..."
+              value={formData.remarks}
+              onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
+            />
+          </div>
         </div>
 
-        {/* Paid By */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Paid By *
-          </label>
-          <select
-            required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
-            value={formData.paidBy}
-            onChange={(e) => setFormData({ ...formData, paidBy: e.target.value })}
-          >
-            <option value="Personal">Personal</option>
-            <option value="Corporate Card">Corporate Card</option>
-            <option value="Cash">Cash</option>
-          </select>
-        </div>
-
-        {/* Remarks */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Remarks
-          </label>
-          <textarea
-            rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 ring-primary focus:border-transparent"
-            placeholder="Additional notes or comments..."
-            value={formData.remarks}
-            onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
-          />
-        </div>
-
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
           <button
             type="button"
             onClick={() => navigate('/my-expenses')}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+            className="btn-secondary"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary px-6 py-2 disabled:opacity-50"
+            className="btn-primary min-w-[140px]"
           >
-            {loading ? 'Submitting...' : 'Submit Expense'}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                Saving...
+              </span>
+            ) : (
+              'Submit Expense'
+            )}
           </button>
         </div>
       </form>
