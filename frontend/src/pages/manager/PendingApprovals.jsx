@@ -4,8 +4,12 @@ import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { CheckCircle, XCircle, FileText, Eye } from 'lucide-react';
 import { format } from 'date-fns';
+import { useAuthStore } from '../../store/authStore';
+import { formatCurrency, getCurrencySymbol } from '../../utils/currencyUtils';
 
 const PendingApprovals = () => {
+  const { user } = useAuthStore();
+  const companyCurrency = user?.company?.currency || 'USD';
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
@@ -21,7 +25,7 @@ const PendingApprovals = () => {
     try {
       const { data } = await api.get('/approvals/pending');
       setExpenses(data.expenses);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load pending approvals');
     } finally {
       setLoading(false);
@@ -105,11 +109,11 @@ const PendingApprovals = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-semibold text-gray-900">
-                      ${expense.amountInCompanyCurrency?.toFixed(2)}
+                      {formatCurrency(expense.amountInCompanyCurrency, companyCurrency)}
                     </div>
                     <div className="text-xs text-gray-500">
                       {expense.currency !== expense.company?.currency && 
-                        `(${expense.amount} ${expense.currency})`
+                        `(${getCurrencySymbol(expense.currency)}${expense.amount} ${expense.currency})`
                       }
                     </div>
                   </td>
@@ -176,7 +180,7 @@ const PendingApprovals = () => {
                 <span className="font-medium">Description:</span> {selectedExpense.description}
               </p>
               <p className="text-sm text-gray-600">
-                <span className="font-medium">Amount:</span> ${selectedExpense.amountInCompanyCurrency?.toFixed(2)}
+                <span className="font-medium">Amount:</span> {formatCurrency(selectedExpense.amountInCompanyCurrency, companyCurrency)}
               </p>
             </div>
             <div className="mb-4">

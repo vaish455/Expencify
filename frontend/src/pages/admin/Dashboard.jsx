@@ -3,9 +3,13 @@ import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { Users, FileText, CheckCircle, XCircle, DollarSign, TrendingUp } from 'lucide-react';
-import { format } from 'date-fns';
+
+import { useAuthStore } from '../../store/authStore';
+import { formatCurrency } from '../../utils/currencyUtils';
 
 const AdminDashboard = () => {
+  const { user } = useAuthStore();
+  const companyCurrency = user?.company?.currency || 'USD';
   const [statistics, setStatistics] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -17,7 +21,7 @@ const AdminDashboard = () => {
     try {
       const { data } = await api.get('/company/statistics');
       setStatistics(data.statistics);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load statistics');
     } finally {
       setLoading(false);
@@ -36,7 +40,7 @@ const AdminDashboard = () => {
     { label: 'Pending', value: statistics?.pendingExpenses || 0, icon: TrendingUp, color: 'yellow' },
     { label: 'Approved', value: statistics?.approvedExpenses || 0, icon: CheckCircle, color: 'green' },
     { label: 'Rejected', value: statistics?.rejectedExpenses || 0, icon: XCircle, color: 'red' },
-    { label: 'Total Amount', value: `${statistics?.totalAmount?.toFixed(2) || 0}`, icon: DollarSign, color: 'indigo' },
+    { label: 'Total Amount', value: formatCurrency(statistics?.totalAmount || 0, companyCurrency), icon: DollarSign, color: 'indigo' },
   ];
 
   return (
@@ -113,7 +117,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="font-bold text-2xl" style={{ color: '#017E84' }}>${item.total?.toFixed(2)}</span>
+                  <span className="font-bold text-2xl" style={{ color: '#017E84' }}>{formatCurrency(item.total, companyCurrency)}</span>
                 </div>
               </div>
             ))}
@@ -155,7 +159,7 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   <div className="text-right ml-4">
-                    <p className="font-bold text-xl" style={{ color: '#5a3a52' }}>${expense.amountInCompanyCurrency?.toFixed(2)}</p>
+                    <p className="font-bold text-xl" style={{ color: '#5a3a52' }}>{formatCurrency(expense.amountInCompanyCurrency, companyCurrency)}</p>
                     <span className={`text-xs px-3 py-1.5 rounded-full font-bold ${
                       expense.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
                       expense.status === 'REJECTED' ? 'bg-red-100 text-red-700' :

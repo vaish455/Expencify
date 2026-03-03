@@ -4,6 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { FileText, CheckCircle, XCircle, Clock, PlusCircle } from 'lucide-react';
+import { formatCurrency } from '../../utils/currencyUtils';
 
 const EmployeeDashboard = () => {
   const { user } = useAuthStore();
@@ -107,7 +108,7 @@ const EmployeeDashboard = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-lg text-gray-900">${expense.amount?.toFixed(2)}</p>
+                      <p className="font-bold text-lg text-gray-900">{formatCurrency(expense.amount, expense.currency)}</p>
                       <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
                         expense.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
                         expense.status === 'REJECTED' ? 'bg-red-100 text-red-700' :

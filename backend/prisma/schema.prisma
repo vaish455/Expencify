@@ -45,12 +45,13 @@ model User {
 }
 
 model Category {
-  id        String    @id @default(uuid())
-  name      String
-  companyId String
-  createdAt DateTime  @default(now())
-  company   Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  expenses  Expense[]
+  id            String         @id @default(uuid())
+  name          String
+  companyId     String
+  createdAt     DateTime       @default(now())
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenses      Expense[]
+  approvalRules ApprovalRule[]
 
   @@unique([name, companyId])
   @@index([companyId])
@@ -102,11 +103,15 @@ model ApprovalRule {
   percentageRequired   Int?
   specificApproverId   String?
   specificApprover     User?           @relation("SpecificApprover", fields: [specificApproverId], references: [id])
+  categoryId           String?
+  category             Category?       @relation(fields: [categoryId], references: [id])
+  minAmount            Float?
+  maxAmount            Float?
   companyId            String
   company              Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
   isActive             Boolean         @default(true)
-  priority             Int             @default(0) // Higher priority rules are checked first
-  requiresManagerFirst Boolean         @default(false) // New: enforce manager approval first
+  priority             Int             @default(0)
+  requiresManagerFirst Boolean         @default(false)
   steps                ApprovalStep[]
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt

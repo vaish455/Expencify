@@ -5,6 +5,7 @@ import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { Search, Filter, Calendar, FileText, PlusCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatCurrency } from '../../utils/currencyUtils';
 
 const MyExpenses = () => {
   const { user } = useAuthStore();
@@ -157,7 +158,7 @@ const MyExpenses = () => {
                     <td className="font-medium text-gray-900">{expense.description}</td>
                     <td className="text-gray-600">{expense.category.name}</td>
                     <td className="font-semibold text-gray-900">
-                      ${expense.amount.toFixed(2)} {expense.currency}
+                      {formatCurrency(expense.amount, expense.currency)}
                     </td>
                     <td className="text-gray-600">
                       {format(new Date(expense.expenseDate), 'MMM dd, yyyy')}

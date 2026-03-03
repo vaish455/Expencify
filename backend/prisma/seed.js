@@ -24,9 +24,9 @@ async function main() {
   console.log('🏢 Creating company...');
   const company = await prisma.company.create({
     data: {
-      name: 'Tech Innovators Inc.',
-      country: 'United States',
-      currency: 'USD',
+      name: 'Tech Innovators Pvt. Ltd.',
+      country: 'India',
+      currency: 'INR',
     },
   });
 
@@ -36,8 +36,8 @@ async function main() {
   // Admin User
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@techinnovators.com',
-      name: 'Alice Admin',
+      email: 'admin@techinnovators.in',
+      name: 'Aarav Sharma',
       password: hashedPassword,
       role: 'ADMIN',
       companyId: company.id,
@@ -47,8 +47,8 @@ async function main() {
   // CEO
   const ceo = await prisma.user.create({
     data: {
-      email: 'ceo@techinnovators.com',
-      name: 'Bob CEO',
+      email: 'ceo@techinnovators.in',
+      name: 'Rajesh Patel',
       password: hashedPassword,
       role: 'CEO',
       companyId: company.id,
@@ -58,8 +58,8 @@ async function main() {
   // CFO
   const cfo = await prisma.user.create({
     data: {
-      email: 'cfo@techinnovators.com',
-      name: 'Carol CFO',
+      email: 'cfo@techinnovators.in',
+      name: 'Priya Mehta',
       password: hashedPassword,
       role: 'CFO',
       companyId: company.id,
@@ -69,8 +69,8 @@ async function main() {
   // CTO
   const cto = await prisma.user.create({
     data: {
-      email: 'cto@techinnovators.com',
-      name: 'David CTO',
+      email: 'cto@techinnovators.in',
+      name: 'Vikram Singh',
       password: hashedPassword,
       role: 'CTO',
       companyId: company.id,
@@ -80,8 +80,8 @@ async function main() {
   // Director
   const director = await prisma.user.create({
     data: {
-      email: 'director@techinnovators.com',
-      name: 'Eve Director',
+      email: 'director@techinnovators.in',
+      name: 'Sneha Gupta',
       password: hashedPassword,
       role: 'DIRECTOR',
       companyId: company.id,
@@ -91,57 +91,58 @@ async function main() {
   // Managers
   const manager1 = await prisma.user.create({
     data: {
-      email: 'manager1@techinnovators.com',
-      name: 'Frank Manager',
+      email: 'manager1@techinnovators.in',
+      name: 'Amit Desai',
       password: hashedPassword,
       role: 'MANAGER',
       companyId: company.id,
-      isManagerApprover: true,
     },
   });
 
   const manager2 = await prisma.user.create({
     data: {
-      email: 'manager2@techinnovators.com',
-      name: 'Grace Manager',
+      email: 'manager2@techinnovators.in',
+      name: 'Neha Joshi',
       password: hashedPassword,
       role: 'MANAGER',
       companyId: company.id,
-      isManagerApprover: true,
     },
   });
 
   // Employees
   const employee1 = await prisma.user.create({
     data: {
-      email: 'employee1@techinnovators.com',
-      name: 'Henry Employee',
+      email: 'employee1@techinnovators.in',
+      name: 'Rohan Verma',
       password: hashedPassword,
       role: 'EMPLOYEE',
       companyId: company.id,
       managerId: manager1.id,
+      isManagerApprover: true,
     },
   });
 
   const employee2 = await prisma.user.create({
     data: {
-      email: 'employee2@techinnovators.com',
-      name: 'Iris Employee',
+      email: 'employee2@techinnovators.in',
+      name: 'Kavita Nair',
       password: hashedPassword,
       role: 'EMPLOYEE',
       companyId: company.id,
       managerId: manager1.id,
+      isManagerApprover: true,
     },
   });
 
   const employee3 = await prisma.user.create({
     data: {
-      email: 'employee3@techinnovators.com',
-      name: 'Jack Employee',
+      email: 'employee3@techinnovators.in',
+      name: 'Suresh Kumar',
       password: hashedPassword,
       role: 'EMPLOYEE',
       companyId: company.id,
       managerId: manager2.id,
+      isManagerApprover: true,
     },
   });
 
@@ -191,6 +192,7 @@ async function main() {
       name: 'Travel Expense Approval',
       type: 'SEQUENTIAL',
       companyId: company.id,
+      categoryId: travelCategory.id,
       priority: 1,
       requiresManagerFirst: true,
       steps: {
@@ -215,6 +217,7 @@ async function main() {
       type: 'SPECIFIC_APPROVER',
       companyId: company.id,
       specificApproverId: cfo.id,
+      minAmount: 50000,
       priority: 2,
       requiresManagerFirst: true,
     },
@@ -249,13 +252,13 @@ async function main() {
   // Expense 1: Pending travel expense
   const expense1 = await prisma.expense.create({
     data: {
-      description: 'Flight to Client Meeting',
-      amount: 750.00,
-      currency: 'USD',
-      amountInCompanyCurrency: 750.00,
+      description: 'Flight to Client Meeting in Mumbai',
+      amount: 12500.00,
+      currency: 'INR',
+      amountInCompanyCurrency: 12500.00,
       expenseDate: new Date('2025-12-10'),
       paidBy: 'Corporate Card',
-      remarks: 'Meeting with ABC Corp in New York',
+      remarks: 'Meeting with ABC Corp in Mumbai',
       status: 'PENDING',
       userId: employee1.id,
       categoryId: travelCategory.id,
@@ -269,12 +272,12 @@ async function main() {
   const expense2 = await prisma.expense.create({
     data: {
       description: 'Team Lunch',
-      amount: 125.50,
-      currency: 'USD',
-      amountInCompanyCurrency: 125.50,
+      amount: 3500.00,
+      currency: 'INR',
+      amountInCompanyCurrency: 3500.00,
       expenseDate: new Date('2025-12-15'),
       paidBy: 'Personal',
-      remarks: 'Team building lunch',
+      remarks: 'Team building lunch at restaurant',
       status: 'APPROVED',
       userId: employee2.id,
       categoryId: mealsCategory.id,
@@ -299,9 +302,9 @@ async function main() {
   const expense3 = await prisma.expense.create({
     data: {
       description: 'Desk Organizers and Stationery',
-      amount: 45.99,
-      currency: 'USD',
-      amountInCompanyCurrency: 45.99,
+      amount: 1850.00,
+      currency: 'INR',
+      amountInCompanyCurrency: 1850.00,
       expenseDate: new Date('2025-12-12'),
       paidBy: 'Corporate Card',
       status: 'PENDING',
@@ -317,9 +320,9 @@ async function main() {
   const expense4 = await prisma.expense.create({
     data: {
       description: 'Annual Slack Subscription',
-      amount: 1200.00,
-      currency: 'USD',
-      amountInCompanyCurrency: 1200.00,
+      amount: 45000.00,
+      currency: 'INR',
+      amountInCompanyCurrency: 45000.00,
       expenseDate: new Date('2025-12-01'),
       paidBy: 'Corporate Card',
       remarks: 'Team communication tool',
@@ -347,9 +350,9 @@ async function main() {
   const expense5 = await prisma.expense.create({
     data: {
       description: 'Google Ads Campaign',
-      amount: 2500.00,
-      currency: 'USD',
-      amountInCompanyCurrency: 2500.00,
+      amount: 75000.00,
+      currency: 'INR',
+      amountInCompanyCurrency: 75000.00,
       expenseDate: new Date('2025-12-08'),
       paidBy: 'Corporate Card',
       remarks: 'Q4 Marketing push',
@@ -367,9 +370,9 @@ async function main() {
   const expense6 = await prisma.expense.create({
     data: {
       description: 'Personal Gym Membership',
-      amount: 89.99,
-      currency: 'USD',
-      amountInCompanyCurrency: 89.99,
+      amount: 4500.00,
+      currency: 'INR',
+      amountInCompanyCurrency: 4500.00,
       expenseDate: new Date('2025-12-05'),
       paidBy: 'Personal',
       status: 'REJECTED',
@@ -397,10 +400,10 @@ async function main() {
   await prisma.ocrData.create({
     data: {
       expenseId: expense1.id,
-      merchantName: 'Delta Airlines',
-      extractedAmount: 750.00,
+      merchantName: 'IndiGo Airlines',
+      extractedAmount: 12500.00,
       extractedDate: new Date('2025-12-10'),
-      rawText: 'DELTA AIRLINES\nFLIGHT TICKET\n$750.00\n10-DEC-2025',
+      rawText: 'INDIGO AIRLINES\nFLIGHT TICKET\n₹12,500.00\n10-DEC-2025',
       confidence: 0.95,
     },
   });
@@ -409,26 +412,33 @@ async function main() {
     data: {
       expenseId: expense5.id,
       merchantName: 'Google Ads',
-      extractedAmount: 2500.00,
+      extractedAmount: 75000.00,
       extractedDate: new Date('2025-12-08'),
-      rawText: 'Google LLC\nAds Campaign\n$2,500.00\n08-DEC-2025',
+      rawText: 'Google LLC\nAds Campaign\n₹75,000.00\n08-DEC-2025',
       confidence: 0.92,
     },
   });
 
   console.log('✨ Seeding completed successfully!');
   console.log('\n📊 Summary:');
-  console.log(`   - Created 1 company: ${company.name}`);
+  console.log(`   - Created 1 company: ${company.name} (Currency: INR)`);
   console.log(`   - Created 10 users (1 Admin, 1 CEO, 1 CFO, 1 CTO, 1 Director, 2 Managers, 3 Employees)`);
   console.log(`   - Created 5 categories`);
   console.log(`   - Created 3 approval rules`);
-  console.log(`   - Created 6 expenses (1 Pending, 1 Approved, 1 In Progress, 1 Rejected)`);
+  console.log(`   - Created 6 expenses (3 Pending, 1 Approved, 1 In Progress, 1 Rejected)`);
+  console.log(`   - Created 3 approval actions`);
   console.log(`   - Created 2 OCR data entries`);
-  console.log('\n🔑 Test Credentials:');
-  console.log('   Email: admin@techinnovators.com | Password: password123');
-  console.log('   Email: ceo@techinnovators.com | Password: password123');
-  console.log('   Email: manager1@techinnovators.com | Password: password123');
-  console.log('   Email: employee1@techinnovators.com | Password: password123');
+  console.log('\n🔑 Test Credentials (password: password123):');
+  console.log('   Admin:    admin@techinnovators.in');
+  console.log('   CEO:      ceo@techinnovators.in');
+  console.log('   CFO:      cfo@techinnovators.in');
+  console.log('   CTO:      cto@techinnovators.in');
+  console.log('   Director: director@techinnovators.in');
+  console.log('   Manager:  manager1@techinnovators.in');
+  console.log('   Manager:  manager2@techinnovators.in');
+  console.log('   Employee: employee1@techinnovators.in');
+  console.log('   Employee: employee2@techinnovators.in');
+  console.log('   Employee: employee3@techinnovators.in');
 }
 
 main()

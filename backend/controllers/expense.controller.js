@@ -58,7 +58,7 @@ class ExpenseController {
 
       // If no manager approval needed, initialize workflow immediately
       if (!needsManagerApproval) {
-        const approvalRules = await prisma.approvalRule.findMany({
+        const allRules = await prisma.approvalRule.findMany({
           where: {
             companyId: req.user.companyId,
             isActive: true
@@ -73,8 +73,15 @@ class ExpenseController {
           orderBy: { priority: 'desc' }
         });
 
+        // Filter rules by category and amount
+        const approvalRules = allRules.filter(rule => {
+          const categoryMatch = !rule.categoryId || rule.categoryId === categoryId;
+          const minMatch = rule.minAmount == null || parseFloat(amount) >= rule.minAmount;
+          const maxMatch = rule.maxAmount == null || parseFloat(amount) <= rule.maxAmount;
+          return categoryMatch && minMatch && maxMatch;
+        });
+
         if (approvalRules.length > 0) {
-          // CRITICAL FIX: Call the standalone function, NOT this.initializeWorkflow
           await initializeExpenseWorkflow(expense.id, approvalRules);
         }
       }
@@ -162,11 +169,17 @@ class ExpenseController {
         },
         include: {
           category: true,
-          user: true,
+          user: {
+            include: {
+              manager: {
+                select: { id: true, name: true, email: true, role: true }
+              }
+            }
+          },
           approvalActions: {
             include: {
               approver: {
-                select: { id: true, name: true, email: true }
+                select: { id: true, name: true, email: true, role: true }
               }
             },
             orderBy: { createdAt: 'asc' }
@@ -311,23 +324,20 @@ class ExpenseController {
 // Helper function for initializing expense workflow (must be outside the class)
 async function initializeExpenseWorkflow(expenseId, rules) {
   try {
-    console.log('Initializing expense workflow for:', expenseId);
-    
-    const allApprovers = new Set();
+    const approverIds = new Set();
 
     for (const rule of rules) {
-      if (rule.type === 'SEQUENTIAL' && rule.steps.length > 0) {
-        allApprovers.add(rule.steps[0].approverId);
-      } else if (rule.type === 'PERCENTAGE' || rule.type === 'HYBRID') {
-        rule.steps.forEach(step => allApprovers.add(step.approverId));
-      } else if (rule.type === 'SPECIFIC_APPROVER' && rule.specificApproverId) {
-        allApprovers.add(rule.specificApproverId);
+      // Add ALL step approvers regardless of rule type
+      if (rule.steps && rule.steps.length > 0) {
+        rule.steps.forEach(step => approverIds.add(step.approverId));
+      }
+      // Add specific approver if set
+      if (rule.specificApproverId) {
+        approverIds.add(rule.specificApproverId);
       }
     }
 
-    console.log('Total unique approvers:', allApprovers.size);
-
-    const actions = Array.from(allApprovers).map(approverId => ({
+    const actions = Array.from(approverIds).map(approverId => ({
       expenseId,
       approverId,
       status: 'PENDING',
@@ -336,7 +346,6 @@ async function initializeExpenseWorkflow(expenseId, rules) {
 
     if (actions.length > 0) {
       await prisma.approvalAction.createMany({ data: actions });
-      console.log('Created', actions.length, 'approval actions for expense:', expenseId);
     }
   } catch (error) {
     console.error('Initialize Expense Workflow Error:', error);

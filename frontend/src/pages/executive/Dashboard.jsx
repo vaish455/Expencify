@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
+import { formatCurrency } from '../../utils/currencyUtils';
 
 const ExecutiveDashboard = () => {
   const { user } = useAuthStore();
@@ -91,7 +92,7 @@ const ExecutiveDashboard = () => {
                       <p className="text-sm text-gray-600">{expense.user.name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">${expense.amountInCompanyCurrency?.toFixed(2)}</p>
+                      <p className="font-semibold">{formatCurrency(expense.amountInCompanyCurrency, user?.company?.currency)}</p>
                       <p className="text-xs text-gray-500">{expense.category.name}</p>
                     </div>
                   </div>
@@ -126,7 +127,7 @@ const ExecutiveDashboard = () => {
                       <p className="text-sm text-gray-600">{expense.category.name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">${expense.amount?.toFixed(2)} {expense.currency}</p>
+                      <p className="font-semibold">{formatCurrency(expense.amount, expense.currency)}</p>
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         expense.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
                         expense.status === 'REJECTED' ? 'bg-red-100 text-red-800' :

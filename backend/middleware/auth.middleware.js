@@ -13,7 +13,12 @@ export const authenticate = async (req, res, next) => {
     
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      include: { company: true }
+      include: {
+        company: true,
+        manager: {
+          select: { id: true, name: true, email: true, role: true }
+        }
+      }
     });
 
     if (!user) {

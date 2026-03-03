@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
-import { Plus, Edit, Trash2, CheckSquare, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, CheckSquare, Users, Filter } from 'lucide-react';
 
 const ApprovalRules = () => {
   const [rules, setRules] = useState([]);
   const [users, setUsers] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingRule, setEditingRule] = useState(null);
@@ -14,6 +15,9 @@ const ApprovalRules = () => {
     type: 'SEQUENTIAL',
     percentageRequired: 50,
     specificApproverId: '',
+    categoryId: '',
+    minAmount: '',
+    maxAmount: '',
     priority: 0,
     requiresManagerFirst: false,
     steps: []
@@ -25,16 +29,17 @@ const ApprovalRules = () => {
 
   const fetchData = async () => {
     try {
-      const [rulesRes, usersRes] = await Promise.all([
+      const [rulesRes, usersRes, categoriesRes] = await Promise.all([
         api.get('/approvals/rules'),
-        api.get('/users') // Fetch all users instead of just managers
+        api.get('/users'),
+        api.get('/categories')
       ]);
       setRules(rulesRes.data.rules);
-      // Filter to get managers and executive roles
       setUsers(usersRes.data.users.filter(u => 
         ['MANAGER', 'ADMIN', 'CEO', 'CFO', 'CTO', 'DIRECTOR'].includes(u.role)
       ));
-    } catch (error) {
+      setCategories(categoriesRes.data.categories || []);
+    } catch {
       toast.error('Failed to load data');
     } finally {
       setLoading(false);
@@ -70,7 +75,7 @@ const ApprovalRules = () => {
       await api.delete(`/approvals/rules/${ruleId}`);
       toast.success('Approval rule deleted successfully');
       fetchData();
-    } catch (error) {
+    } catch {
       toast.error('Failed to delete approval rule');
     }
   };
@@ -82,6 +87,9 @@ const ApprovalRules = () => {
       type: rule.type,
       percentageRequired: rule.percentageRequired || 50,
       specificApproverId: rule.specificApproverId || '',
+      categoryId: rule.categoryId || '',
+      minAmount: rule.minAmount != null ? rule.minAmount : '',
+      maxAmount: rule.maxAmount != null ? rule.maxAmount : '',
       priority: rule.priority || 0,
       requiresManagerFirst: rule.requiresManagerFirst || false,
       steps: rule.steps.map(s => ({ approverId: s.approverId }))
@@ -96,6 +104,9 @@ const ApprovalRules = () => {
       type: 'SEQUENTIAL',
       percentageRequired: 50,
       specificApproverId: '',
+      categoryId: '',
+      minAmount: '',
+      maxAmount: '',
       priority: 0,
       requiresManagerFirst: false,
       steps: []
@@ -158,6 +169,22 @@ const ApprovalRules = () => {
                 <p className="text-sm text-gray-600 mb-3">Type: {rule.type}</p>
                 
                 <div className="space-y-2 text-sm">
+                  {(rule.category || rule.minAmount != null || rule.maxAmount != null) ? (
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Filter className="w-4 h-4" />
+                      <span>
+                        {rule.category ? `Category: ${rule.category.name}` : 'Any category'}
+                        {(rule.minAmount != null || rule.maxAmount != null) && (
+                          <> • Amount: {rule.minAmount != null ? `≥ ₹${rule.minAmount.toLocaleString()}` : ''}
+                          {rule.minAmount != null && rule.maxAmount != null ? ' and ' : ''}
+                          {rule.maxAmount != null ? `≤ ₹${rule.maxAmount.toLocaleString()}` : ''}</>
+                        )}
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 italic">Applies to: All expenses</p>
+                  )}
+
                   {rule.requiresManagerFirst && (
                     <p className="text-purple-600 font-medium">⚡ Requires Manager Approval First</p>
                   )}
@@ -284,6 +311,49 @@ const ApprovalRules = () => {
                   </select>
                 </div>
               )}
+
+              <div className="p-4 rounded-xl" style={{ backgroundColor: '#f5f3f4' }}>
+                <p className="text-sm font-medium text-gray-700 mb-3">Rule Conditions (optional)</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-1">Apply to Category</label>
+                    <select
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
+                      value={formData.categoryId}
+                      onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                    >
+                      <option value="">All Categories</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Min Amount</label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="No minimum"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
+                        value={formData.minAmount}
+                        onChange={(e) => setFormData({ ...formData, minAmount: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-1">Max Amount</label>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="No maximum"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 ring-primary focus:border-transparent transition-all"
+                        value={formData.maxAmount}
+                        onChange={(e) => setFormData({ ...formData, maxAmount: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Priority</label>

@@ -4,19 +4,19 @@ import crypto from 'crypto';
 class EmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT,
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
       secure: false,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
       },
     });
   }
 
   async sendWelcomeEmail(user, company) {
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
+      from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'Welcome to Expencify!',
       html: `
@@ -45,7 +45,7 @@ class EmailService {
 
   async sendUserCreatedEmail(user, password, company, createdBy) {
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
+      from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'Your Expencify Account Has Been Created',
       html: `
@@ -84,7 +84,7 @@ class EmailService {
 
   async sendLoginNotification(user) {
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
+      from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'New Login Detected',
       html: `
@@ -103,7 +103,7 @@ class EmailService {
 
   async sendPasswordChangeNotification(user) {
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
+      from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'Password Changed Successfully',
       html: `
@@ -122,7 +122,7 @@ class EmailService {
 
   async sendExpenseSubmittedEmail(user, expense, company) {
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
+      from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'Expense Submitted Successfully',
       html: `
@@ -149,7 +149,7 @@ class EmailService {
 
   async sendExpenseApprovedEmail(user, expense, approvedBy) {
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
+      from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'Expense Approved',
       html: `
@@ -174,7 +174,7 @@ class EmailService {
 
   async sendExpenseRejectedEmail(user, expense, rejectedBy, reason) {
     const mailOptions = {
-      from: process.env.EMAIL_FROM,
+      from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'Expense Rejected',
       html: `

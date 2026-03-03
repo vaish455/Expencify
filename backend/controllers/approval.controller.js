@@ -2,6 +2,10 @@ import { validationResult } from 'express-validator';
 import prisma from '../config/database.js';
 
 class ApprovalController {
+  // ========================
+  // CRUD for Approval Rules
+  // ========================
+
   async createApprovalRule(req, res, next) {
     try {
       const errors = validationResult(req);
@@ -9,7 +13,7 @@ class ApprovalController {
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const { name, type, percentageRequired, specificApproverId, steps, priority, requiresManagerFirst } = req.body;
+      const { name, type, percentageRequired, specificApproverId, categoryId, minAmount, maxAmount, steps, priority, requiresManagerFirst } = req.body;
 
       const rule = await prisma.$transaction(async (tx) => {
         const approvalRule = await tx.approvalRule.create({
@@ -18,6 +22,9 @@ class ApprovalController {
             type,
             percentageRequired: percentageRequired || null,
             specificApproverId: specificApproverId || null,
+            categoryId: categoryId || null,
+            minAmount: minAmount != null ? parseFloat(minAmount) : null,
+            maxAmount: maxAmount != null ? parseFloat(maxAmount) : null,
             priority: priority || 0,
             requiresManagerFirst: requiresManagerFirst || false,
             companyId: req.user.companyId
@@ -47,6 +54,9 @@ class ApprovalController {
             },
             specificApprover: {
               select: { id: true, name: true, email: true, role: true }
+            },
+            category: {
+              select: { id: true, name: true }
             }
           }
         });
@@ -76,6 +86,9 @@ class ApprovalController {
           },
           specificApprover: {
             select: { id: true, name: true, email: true, role: true }
+          },
+          category: {
+            select: { id: true, name: true }
           }
         },
         orderBy: { priority: 'desc' }
@@ -90,16 +103,19 @@ class ApprovalController {
   async updateApprovalRule(req, res, next) {
     try {
       const { id } = req.params;
-      const { name, type, percentageRequired, specificApproverId, steps, isActive, priority, requiresManagerFirst } = req.body;
+      const { name, type, percentageRequired, specificApproverId, categoryId, minAmount, maxAmount, steps, isActive, priority, requiresManagerFirst } = req.body;
 
       const rule = await prisma.$transaction(async (tx) => {
-        const updated = await tx.approvalRule.update({
+        await tx.approvalRule.update({
           where: { id },
           data: {
             name,
             type,
             percentageRequired,
-            specificApproverId,
+            specificApproverId: specificApproverId || null,
+            categoryId: categoryId || null,
+            minAmount: minAmount != null ? parseFloat(minAmount) : null,
+            maxAmount: maxAmount != null ? parseFloat(maxAmount) : null,
             isActive,
             priority: priority || 0,
             requiresManagerFirst: requiresManagerFirst || false
@@ -157,28 +173,61 @@ class ApprovalController {
     }
   }
 
+  // ========================
+  // Pending Approvals
+  // ========================
+
   async getPendingApprovals(req, res, next) {
     try {
+      const includeFields = {
+        category: true,
+        user: {
+          select: {
+            id: true, name: true, email: true,
+            managerId: true, isManagerApprover: true,
+            manager: { select: { id: true, name: true, email: true } }
+          }
+        },
+        company: { select: { currency: true } },
+        approvalActions: {
+          include: {
+            approver: { select: { id: true, name: true, email: true, role: true } }
+          },
+          orderBy: { createdAt: 'asc' }
+        }
+      };
+
       let expenses = [];
 
-      if (['MANAGER', 'CEO', 'CFO', 'CTO', 'DIRECTOR'].includes(req.user.role)) {
-        // Get expenses where this user needs to approve
-        const userExpenses = await prisma.expense.findMany({
+      if (req.user.role === 'ADMIN') {
+        // Admin sees ALL pending/in-progress expenses
+        expenses = await prisma.expense.findMany({
           where: {
             companyId: req.user.companyId,
+            status: { in: ['PENDING', 'IN_PROGRESS'] }
+          },
+          include: includeFields,
+          orderBy: { createdAt: 'desc' }
+        });
+      } else if (['MANAGER', 'CEO', 'CFO', 'CTO', 'DIRECTOR'].includes(req.user.role)) {
+        // Managers & Executives see:
+        // 1) Expenses from their direct reports that need manager approval
+        // 2) Expenses where they have a PENDING workflow ApprovalAction
+        expenses = await prisma.expense.findMany({
+          where: {
+            companyId: req.user.companyId,
+            status: { in: ['PENDING', 'IN_PROGRESS'] },
             OR: [
-              // Expenses from their team requiring manager approval (if they're a manager)
-              ...(req.user.role === 'MANAGER' ? [{
+              // Direct reports needing manager approval
+              {
                 user: {
                   managerId: req.user.id,
                   isManagerApprover: true
                 },
-                managerApprovalComplete: false,
-                status: { in: ['PENDING', 'IN_PROGRESS'] }
-              }] : []),
-              // Expenses in approval workflow where they are next approver
+                managerApprovalComplete: false
+              },
+              // This user has a pending approval action in the workflow
               {
-                status: 'IN_PROGRESS',
                 managerApprovalComplete: true,
                 approvalActions: {
                   some: {
@@ -189,325 +238,183 @@ class ApprovalController {
               }
             ]
           },
-          include: {
-            category: true,
-            user: {
-              select: { id: true, name: true, email: true, managerId: true, isManagerApprover: true, manager: { select: { id: true, name: true } } }
-            },
-            company: {
-              select: { currency: true }
-            },
-            approvalActions: {
-              include: {
-                approver: {
-                  select: { id: true, name: true, email: true, role: true }
-                }
-              },
-              orderBy: { createdAt: 'asc' }
-            }
-          },
-          orderBy: { createdAt: 'desc' }
-        });
-
-        expenses = userExpenses;
-      } else if (req.user.role === 'ADMIN') {
-        expenses = await prisma.expense.findMany({
-          where: {
-            companyId: req.user.companyId,
-            status: { in: ['PENDING', 'IN_PROGRESS'] }
-          },
-          include: {
-            category: true,
-            user: {
-              select: { id: true, name: true, email: true, managerId: true, isManagerApprover: true, manager: { select: { id: true, name: true } } }
-            },
-            company: {
-              select: { currency: true }
-            },
-            approvalActions: {
-              include: {
-                approver: {
-                  select: { id: true, name: true, email: true, role: true }
-                }
-              },
-              orderBy: { createdAt: 'asc' }
-            }
-          },
+          include: includeFields,
           orderBy: { createdAt: 'desc' }
         });
       }
 
-      res.json({ expenses: expenses || [] });
+      res.json({ expenses });
     } catch (error) {
       console.error('Get Pending Approvals Error:', error);
       next(error);
     }
   }
 
+  // ========================
+  // Process Approval
+  // ========================
+
   async processApproval(req, res, next) {
     try {
-      console.log('Processing approval:', { expenseId: req.params.expenseId, userId: req.user.id, body: req.body });
-      
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        console.error('Validation errors:', errors.array());
         return res.status(400).json({ errors: errors.array() });
       }
 
       const { expenseId } = req.params;
       const { status, comments } = req.body;
 
+      // Load the expense with all relationships
       const expense = await prisma.expense.findFirst({
         where: {
           id: expenseId,
           companyId: req.user.companyId
         },
         include: {
-          user: {
-            include: {
-              manager: true
-            }
-          },
+          user: { include: { manager: true } },
           approvalActions: {
-            include: {
-              approver: true
-            },
+            include: { approver: true },
             orderBy: { stepIndex: 'asc' }
           }
         }
       });
 
-      console.log('Found expense:', { id: expense?.id, status: expense?.status, managerApprovalComplete: expense?.managerApprovalComplete });
-
       if (!expense) {
-        console.error('Expense not found:', expenseId);
         return res.status(404).json({ error: 'Expense not found' });
       }
 
-      // Check if user is authorized to approve this expense
-      const isManager = expense.user.managerId === req.user.id;
-      const hasApprovalAction = expense.approvalActions.some(
-        action => action.approverId === req.user.id && action.status === 'PENDING'
-      );
-
-      console.log('Authorization check:', { isManager, hasApprovalAction, userRole: req.user.role });
-
-      if (!isManager && !hasApprovalAction && req.user.role !== 'ADMIN') {
-        console.error('Unauthorized approval attempt');
-        return res.status(403).json({ error: 'You are not authorized to approve this expense' });
+      // Prevent re-processing finalized expenses
+      if (expense.status === 'APPROVED' || expense.status === 'REJECTED') {
+        return res.status(400).json({ error: 'This expense has already been finalized' });
       }
 
-      // Get active approval rules
-      const approvalRules = await prisma.approvalRule.findMany({
-        where: {
-          companyId: req.user.companyId,
-          isActive: true
-        },
-        include: {
-          steps: {
-            include: {
-              approver: true
-            },
-            orderBy: { sequence: 'asc' }
-          },
-          specificApprover: true
-        },
-        orderBy: { priority: 'desc' }
-      });
+      const isAssignedManager = expense.user.managerId === req.user.id;
+      const isAdmin = req.user.role === 'ADMIN';
+      const pendingAction = expense.approvalActions.find(
+        a => a.approverId === req.user.id && a.status === 'PENDING'
+      );
 
-      console.log('Found approval rules:', approvalRules.length);
-
-      const result = await prisma.$transaction(async (tx) => {
-        // Handle Manager Approval First
-        if (expense.user.isManagerApprover && !expense.managerApprovalComplete) {
-          console.log('Processing manager approval');
-          
-          if (isManager || req.user.role === 'ADMIN') {
-            // Create manager approval action
-            const managerAction = await tx.approvalAction.create({
-              data: {
-                expenseId,
-                approverId: req.user.id,
-                status,
-                comments: comments || null,
-                stepIndex: -1 // Manager approval is step -1
-              }
-            });
-
-            console.log('Created manager approval action:', managerAction.id);
-
-            if (status === 'REJECTED') {
-              await tx.expense.update({
-                where: { id: expenseId },
-                data: { status: 'REJECTED' }
-              });
-              return { approved: false, rejected: true, message: 'Expense rejected by manager' };
-            }
-
-            // Manager approved, mark as complete and initialize workflow
-            await tx.expense.update({
-              where: { id: expenseId },
-              data: {
-                managerApprovalComplete: true,
-                status: 'IN_PROGRESS'
-              }
-            });
-
-            console.log('Manager approval complete, initializing workflow');
-
-            // Create pending approval actions for the workflow
-            if (approvalRules.length > 0) {
-              await initializeApprovalWorkflow(expenseId, approvalRules, tx);
-            } else {
-              // No approval rules, auto-approve
-              console.log('No approval rules found, auto-approving');
-              await tx.expense.update({
-                where: { id: expenseId },
-                data: { status: 'APPROVED' }
-              });
-              return {
-                approved: true,
-                message: 'Expense auto-approved (no approval rules configured)'
-              };
-            }
-
-            return {
-              approved: false,
-              managerApproved: true,
-              message: 'Manager approval complete. Expense moved to approval workflow.'
-            };
-          } else {
-            return { error: 'Manager must approve this expense first', statusCode: 403 };
-          }
-        }
-
-        // Handle Workflow Approvals
-        console.log('Processing workflow approval');
-        
-        const currentAction = expense.approvalActions.find(
-          action => action.approverId === req.user.id && action.status === 'PENDING'
-        );
-
-        console.log('Current action:', currentAction?.id);
-
-        if (!currentAction && req.user.role !== 'ADMIN') {
-          return { error: 'No pending approval action found for you', statusCode: 403 };
-        }
-
-        // Update or create approval action
-        if (currentAction) {
-          await tx.approvalAction.update({
-            where: { id: currentAction.id },
-            data: {
-              status,
-              comments: comments || null
-            }
+      // ─── PHASE 1: Manager Approval ───
+      if (expense.user.isManagerApprover && !expense.managerApprovalComplete) {
+        if (!isAssignedManager && !isAdmin) {
+          return res.status(403).json({
+            error: 'Only the assigned manager can approve at this stage'
           });
-          console.log('Updated approval action:', currentAction.id);
-        } else if (req.user.role === 'ADMIN') {
-          // Admin can approve even without a specific action
-          const adminAction = await tx.approvalAction.create({
+        }
+
+        const result = await prisma.$transaction(async (tx) => {
+          // Record the manager's decision
+          await tx.approvalAction.create({
             data: {
               expenseId,
               approverId: req.user.id,
               status,
               comments: comments || null,
-              stepIndex: expense.currentStepIndex || 0
+              stepIndex: -1
             }
           });
-          console.log('Created admin approval action:', adminAction.id);
+
+          if (status === 'REJECTED') {
+            await tx.expense.update({
+              where: { id: expenseId },
+              data: { status: 'REJECTED' }
+            });
+            return { rejected: true, message: 'Expense rejected by manager' };
+          }
+
+          // Manager approved → move to workflow phase
+          await tx.expense.update({
+            where: { id: expenseId },
+            data: {
+              managerApprovalComplete: true,
+              status: 'IN_PROGRESS'
+            }
+          });
+
+          // Load approval rules and initialize the workflow
+          const rules = await getActiveRules(req.user.companyId, tx, expense.categoryId, expense.amount);
+
+          if (rules.length === 0) {
+            // No rules configured — auto-approve after manager
+            await tx.expense.update({
+              where: { id: expenseId },
+              data: { status: 'APPROVED' }
+            });
+            return {
+              approved: true,
+              message: 'Expense approved (no further approval rules configured)'
+            };
+          }
+
+          await initializeWorkflow(expenseId, rules, tx);
+          return {
+            managerApproved: true,
+            message: 'Manager approved. Expense moved to approval workflow.'
+          };
+        });
+
+        return res.json(result);
+      }
+
+      // ─── PHASE 2: Workflow Approval ───
+      if (!pendingAction && !isAdmin) {
+        return res.status(403).json({
+          error: 'You do not have a pending approval action for this expense'
+        });
+      }
+
+      const result = await prisma.$transaction(async (tx) => {
+        // Record the decision
+        if (pendingAction) {
+          await tx.approvalAction.update({
+            where: { id: pendingAction.id },
+            data: { status, comments: comments || null }
+          });
+        } else if (isAdmin) {
+          await tx.approvalAction.create({
+            data: {
+              expenseId,
+              approverId: req.user.id,
+              status,
+              comments: comments || null,
+              stepIndex: 0
+            }
+          });
         }
 
+        // Rejection immediately finalizes the expense
         if (status === 'REJECTED') {
           await tx.expense.update({
             where: { id: expenseId },
             data: { status: 'REJECTED' }
           });
-          return { approved: false, rejected: true, message: 'Expense rejected' };
+          return { rejected: true, message: 'Expense rejected' };
         }
 
-        // If no approval rules, auto-approve
-        if (approvalRules.length === 0) {
-          console.log('No approval rules, auto-approving');
-          await tx.expense.update({
-            where: { id: expenseId },
-            data: { status: 'APPROVED' }
-          });
-          return { approved: true, message: 'Expense approved (no approval rules configured)' };
-        }
-
-        // Check if expense should be approved based on rules
-        const shouldApprove = await evaluateApprovalRules(
-          expenseId,
-          approvalRules,
-          tx
-        );
-
-        console.log('Evaluation result:', shouldApprove);
-
-        if (shouldApprove.approved) {
-          await tx.expense.update({
-            where: { id: expenseId },
-            data: { status: 'APPROVED' }
-          });
-          return { approved: true, message: shouldApprove.reason };
-        }
-
-        // Move to next step if sequential
-        const sequentialRule = approvalRules.find(r => r.type === 'SEQUENTIAL');
-        if (sequentialRule && sequentialRule.steps.length > 0) {
-          const currentStepIndex = expense.currentStepIndex || 0;
-          const nextStep = sequentialRule.steps[currentStepIndex + 1];
-          
-          console.log('Sequential rule:', { currentStepIndex, hasNextStep: !!nextStep });
-          
-          if (nextStep) {
-            // Check if action already exists for next step
-            const existingNextAction = await tx.approvalAction.findFirst({
-              where: {
-                expenseId,
-                approverId: nextStep.approverId,
-                stepIndex: currentStepIndex + 1
-              }
-            });
-
-            if (!existingNextAction) {
-              // Create pending action for next approver
-              await tx.approvalAction.create({
-                data: {
-                  expenseId,
-                  approverId: nextStep.approverId,
-                  status: 'PENDING',
-                  stepIndex: currentStepIndex + 1
-                }
-              });
-            }
-
-            await tx.expense.update({
-              where: { id: expenseId },
-              data: {
-                currentStepIndex: currentStepIndex + 1
-              }
-            });
-
-            return {
-              approved: false,
-              message: `Approval recorded. Forwarded to ${nextStep.approver.name} for next approval.`
-            };
+        // Check if ALL workflow approvers have approved
+        const remainingPending = await tx.approvalAction.count({
+          where: {
+            expenseId,
+            stepIndex: { gte: 0 },
+            status: 'PENDING'
           }
+        });
+
+        if (remainingPending === 0) {
+          // All approvers have approved → expense is fully approved
+          await tx.expense.update({
+            where: { id: expenseId },
+            data: { status: 'APPROVED' }
+          });
+          return { approved: true, message: 'All approvers have approved. Expense is fully approved!' };
         }
 
-        return { approved: false, message: 'Approval recorded, waiting for more approvals' };
+        return {
+          message: `Approval recorded. ${remainingPending} more approval(s) needed.`
+        };
       });
 
-      console.log('Transaction result:', result);
-
-      // Handle errors from transaction
-      if (result.error) {
-        return res.status(result.statusCode || 400).json({ error: result.error });
-      }
-
-      res.json(result);
+      return res.json(result);
     } catch (error) {
       console.error('Process Approval Error:', {
         message: error.message,
@@ -518,196 +425,80 @@ class ApprovalController {
       next(error);
     }
   }
-
-  async initializeApprovalWorkflow(expenseId, rules, tx) {
-    return initializeApprovalWorkflow(expenseId, rules, tx);
-  }
-
-  async evaluateApprovalRules(expenseId, rules, tx) {
-    return evaluateApprovalRules(expenseId, rules, tx);
-  }
 }
 
-// Helper functions defined outside the class to avoid context issues
-async function initializeApprovalWorkflow(expenseId, rules, tx) {
-  try {
-    console.log('Initializing approval workflow for expense:', expenseId);
-    
-    // Create pending approval actions based on rules
-    const allApprovers = new Set();
+// ═══════════════════════════════════
+// Helper Functions
+// ═══════════════════════════════════
 
-    for (const rule of rules) {
-      if (rule.type === 'SEQUENTIAL') {
-        // For sequential, only add first approver
-        if (rule.steps && rule.steps.length > 0) {
-          allApprovers.add(rule.steps[0].approverId);
-          console.log('Added sequential first approver:', rule.steps[0].approverId);
-        }
-      } else if (rule.type === 'PERCENTAGE' || rule.type === 'HYBRID') {
-        // Add all approvers in steps
-        if (rule.steps) {
-          rule.steps.forEach(step => {
-            allApprovers.add(step.approverId);
-            console.log('Added approver:', step.approverId);
-          });
-        }
-      } else if (rule.type === 'SPECIFIC_APPROVER' && rule.specificApproverId) {
-        allApprovers.add(rule.specificApproverId);
-        console.log('Added specific approver:', rule.specificApproverId);
-      }
-    }
-
-    console.log('Total unique approvers:', allApprovers.size);
-
-    // Check for existing actions to avoid duplicates
-    const existingActions = await tx.approvalAction.findMany({
-      where: {
-        expenseId,
-        stepIndex: 0
+/**
+ * Get active approval rules that match the given expense's category and amount.
+ * Rules match when:
+ *   - categoryId is NULL (matches any) OR equals the expense category
+ *   - minAmount is NULL (no minimum) OR expense amount >= minAmount
+ *   - maxAmount is NULL (no maximum) OR expense amount <= maxAmount
+ */
+async function getActiveRules(companyId, tx, categoryId = null, amount = null) {
+  const allRules = await tx.approvalRule.findMany({
+    where: { companyId, isActive: true },
+    include: {
+      steps: {
+        include: { approver: true },
+        orderBy: { sequence: 'asc' }
       },
-      select: { approverId: true }
-    });
+      specificApprover: true,
+      category: { select: { id: true, name: true } }
+    },
+    orderBy: { priority: 'desc' }
+  });
 
-    const existingApproverIds = new Set(existingActions.map(a => a.approverId));
-    console.log('Existing approver actions:', existingApproverIds.size);
-
-    // Create pending actions only for new approvers
-    const actions = Array.from(allApprovers)
-      .filter(approverId => !existingApproverIds.has(approverId))
-      .map(approverId => ({
-        expenseId,
-        approverId,
-        status: 'PENDING',
-        stepIndex: 0
-      }));
-
-    console.log('Creating approval actions:', actions.length);
-
-    if (actions.length > 0) {
-      await tx.approvalAction.createMany({ data: actions });
-      console.log('Approval actions created successfully');
-    } else {
-      console.log('No new approval actions needed');
-    }
-  } catch (error) {
-    console.error('Initialize Approval Workflow Error:', {
-      message: error.message,
-      stack: error.stack,
-      expenseId
-    });
-    throw error;
-  }
+  // Filter rules by category and amount
+  return allRules.filter(rule => {
+    const categoryMatch = !rule.categoryId || rule.categoryId === categoryId;
+    const minMatch = rule.minAmount == null || (amount != null && amount >= rule.minAmount);
+    const maxMatch = rule.maxAmount == null || (amount != null && amount <= rule.maxAmount);
+    return categoryMatch && minMatch && maxMatch;
+  });
 }
 
-async function evaluateApprovalRules(expenseId, rules, tx) {
-  try {
-    console.log('Evaluating approval rules for expense:', expenseId);
-    
-    const approvedActions = await tx.approvalAction.findMany({
-      where: {
-        expenseId,
-        status: 'APPROVED',
-        stepIndex: { gte: 0 } // Only count workflow approvals, not manager (-1)
-      },
-      include: {
-        approver: true
-      }
-    });
+/**
+ * Create PENDING ApprovalActions for ALL approvers from ALL active rules.
+ * Every configured approver gets a PENDING action — the expense is only fully
+ * approved when ALL of them have approved.
+ */
+async function initializeWorkflow(expenseId, rules, tx) {
+  const approverIds = new Set();
 
-    console.log('Approved actions count:', approvedActions.length);
-
-    const approverIds = approvedActions.map(a => a.approverId);
-
-    // Check each rule (sorted by priority)
-    for (const rule of rules) {
-      console.log('Checking rule:', rule.name, rule.type);
-      
-      // SPECIFIC_APPROVER: If specific person approved, auto-approve
-      if (rule.type === 'SPECIFIC_APPROVER') {
-        if (rule.specificApproverId && approverIds.includes(rule.specificApproverId)) {
-          console.log('Rule satisfied: SPECIFIC_APPROVER');
-          return {
-            approved: true,
-            reason: `Auto-approved by specific approver: ${rule.specificApprover?.name || 'Unknown'}`
-          };
-        }
-      }
-
-      // PERCENTAGE: Check if required percentage met
-      if (rule.type === 'PERCENTAGE') {
-        const totalApprovers = rule.steps?.length || 0;
-        const approvedCount = (rule.steps || []).filter(step =>
-          approverIds.includes(step.approverId)
-        ).length;
-        const percentage = totalApprovers > 0 ? (approvedCount / totalApprovers) * 100 : 0;
-
-        console.log('Percentage check:', { approvedCount, totalApprovers, percentage, required: rule.percentageRequired });
-
-        if (percentage >= (rule.percentageRequired || 0)) {
-          console.log('Rule satisfied: PERCENTAGE');
-          return {
-            approved: true,
-            reason: `Approved by ${percentage.toFixed(0)}% of approvers (required: ${rule.percentageRequired}%)`
-          };
-        }
-      }
-
-      // SEQUENTIAL: Check if all steps completed
-      if (rule.type === 'SEQUENTIAL') {
-        const allStepsApproved = (rule.steps || []).every(step =>
-          approverIds.includes(step.approverId)
-        );
-
-        console.log('Sequential check:', { allStepsApproved, totalSteps: rule.steps?.length });
-
-        if (allStepsApproved && rule.steps && rule.steps.length > 0) {
-          console.log('Rule satisfied: SEQUENTIAL');
-          return {
-            approved: true,
-            reason: 'All sequential approvers have approved'
-          };
-        }
-      }
-
-      // HYBRID: Specific approver OR percentage
-      if (rule.type === 'HYBRID') {
-        // Check specific approver
-        if (rule.specificApproverId && approverIds.includes(rule.specificApproverId)) {
-          console.log('Rule satisfied: HYBRID (specific approver)');
-          return {
-            approved: true,
-            reason: `Auto-approved by specific approver: ${rule.specificApprover?.name || 'Unknown'}`
-          };
-        }
-
-        // Check percentage
-        const totalApprovers = rule.steps?.length || 0;
-        const approvedCount = (rule.steps || []).filter(step =>
-          approverIds.includes(step.approverId)
-        ).length;
-        const percentage = totalApprovers > 0 ? (approvedCount / totalApprovers) * 100 : 0;
-
-        console.log('Hybrid percentage check:', { approvedCount, totalApprovers, percentage, required: rule.percentageRequired });
-
-        if (percentage >= (rule.percentageRequired || 0)) {
-          console.log('Rule satisfied: HYBRID (percentage)');
-          return {
-            approved: true,
-            reason: `Approved by ${percentage.toFixed(0)}% of approvers (required: ${rule.percentageRequired}%)`
-          };
-        }
-      }
+  for (const rule of rules) {
+    // Add all step approvers (regardless of rule type)
+    if (rule.steps && rule.steps.length > 0) {
+      rule.steps.forEach(step => approverIds.add(step.approverId));
     }
 
-    console.log('No rules satisfied yet');
-    return { approved: false };
-  } catch (error) {
-    console.error('Evaluate Approval Rules Error:', {
-      message: error.message,
-      stack: error.stack,
-      expenseId
-    });
-    throw error;
+    // Add specific approver if set
+    if (rule.specificApproverId) {
+      approverIds.add(rule.specificApproverId);
+    }
+  }
+
+  // Avoid duplicates with existing actions
+  const existing = await tx.approvalAction.findMany({
+    where: { expenseId, stepIndex: { gte: 0 } },
+    select: { approverId: true }
+  });
+  const existingIds = new Set(existing.map(a => a.approverId));
+
+  const actions = Array.from(approverIds)
+    .filter(id => !existingIds.has(id))
+    .map(approverId => ({
+      expenseId,
+      approverId,
+      status: 'PENDING',
+      stepIndex: 0
+    }));
+
+  if (actions.length > 0) {
+    await tx.approvalAction.createMany({ data: actions });
   }
 }
 

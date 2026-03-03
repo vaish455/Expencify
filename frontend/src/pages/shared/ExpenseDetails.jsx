@@ -1,27 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../store/authStore';
+
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Calendar, DollarSign, User, Tag, FileText, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatCurrency } from '../../utils/currencyUtils';
 
 const ExpenseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
   const [expense, setExpense] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchExpenseDetails();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchExpenseDetails = async () => {
     try {
       const { data } = await api.get(`/expenses/${id}`);
       setExpense(data.expense);
-    } catch (error) {
+    } catch {
       toast.error('Failed to load expense details');
       navigate(-1);
     } finally {
@@ -79,11 +80,11 @@ const ExpenseDetails = () => {
               <div>
                 <p className="text-sm text-gray-600">Amount</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  ${expense.amount.toFixed(2)} {expense.currency}
+                  {formatCurrency(expense.amount, expense.currency)}
                 </p>
                 {expense.amountInCompanyCurrency && expense.currency !== expense.company?.currency && (
                   <p className="text-sm text-gray-500">
-                    (${expense.amountInCompanyCurrency.toFixed(2)} in company currency)
+                    ({formatCurrency(expense.amountInCompanyCurrency, expense.company?.currency)} in company currency)
                   </p>
                 )}
               </div>
@@ -147,7 +148,7 @@ const ExpenseDetails = () => {
                   <p><span className="font-medium">Merchant:</span> {expense.ocrData.merchantName}</p>
                 )}
                 {expense.ocrData.extractedAmount && (
-                  <p><span className="font-medium">Amount:</span> ${expense.ocrData.extractedAmount}</p>
+                  <p><span className="font-medium">Amount:</span> {formatCurrency(expense.ocrData.extractedAmount, expense.currency)}</p>
                 )}
                 {expense.ocrData.confidence && (
                   <p><span className="font-medium">Confidence:</span> {expense.ocrData.confidence.toFixed(2)}%</p>
@@ -157,54 +158,78 @@ const ExpenseDetails = () => {
           )}
         </div>
 
-        {expense.approvalActions && expense.approvalActions.length > 0 && (
+        {(expense.approvalActions?.length > 0 || expense.user?.isManagerApprover) && (
           <div className="border-t border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Approval Workflow</h3>
             
             {/* Manager Approval Section */}
-            {expense.user.isManagerApprover && (
+            {expense.user?.isManagerApprover && (
               <div className="mb-6 p-4 rounded-xl" style={{ background: 'linear-gradient(135deg, #E6F7F8 0%, #B3E5E8 50%)' }}>
                 <h4 className="font-medium mb-3 flex items-center" style={{ color: '#017E84' }}>
                   <User className="w-5 h-5 mr-2" />
                   Manager Approval
                 </h4>
-                {expense.approvalActions
-                  .filter(action => action.stepIndex === -1)
-                  .map(action => (
-                    <div key={action.id} className="flex items-start space-x-3 p-3 bg-white rounded-xl">
-                      <div className={`p-2 rounded-full ${
-                        action.status === 'APPROVED' ? 'bg-green-100' : 'bg-red-100'
-                      }`}>
-                        {action.status === 'APPROVED' ? (
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                        ) : (
-                          <XCircle className="w-5 h-5 text-red-600" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-medium text-gray-900">{action.approver.name}</p>
-                            <p className="text-sm text-gray-600">{action.status}</p>
-                          </div>
-                          <p className="text-xs text-gray-500">
-                            {format(new Date(action.createdAt), 'MMM dd, yyyy HH:mm')}
-                          </p>
+                {(() => {
+                  const managerAction = expense.approvalActions?.find(a => a.stepIndex === -1);
+                  const manager = expense.user?.manager;
+                  
+                  if (managerAction) {
+                    // Manager has already acted
+                    return (
+                      <div className="flex items-start space-x-3 p-3 bg-white rounded-xl">
+                        <div className={`p-2 rounded-full ${
+                          managerAction.status === 'APPROVED' ? 'bg-green-100' : 'bg-red-100'
+                        }`}>
+                          {managerAction.status === 'APPROVED' ? (
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-red-600" />
+                          )}
                         </div>
-                        {action.comments && (
-                          <p className="text-sm text-gray-600 mt-2 italic">"{action.comments}"</p>
-                        )}
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium text-gray-900">{managerAction.approver.name}</p>
+                              <p className="text-sm text-gray-600">{managerAction.status === 'APPROVED' ? 'Approved' : 'Rejected'}</p>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                              {format(new Date(managerAction.createdAt), 'MMM dd, yyyy HH:mm')}
+                            </p>
+                          </div>
+                          {managerAction.comments && (
+                            <p className="text-sm text-gray-600 mt-2 italic">"{managerAction.comments}"</p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  } else if (manager) {
+                    // Manager hasn't acted yet — show as pending
+                    return (
+                      <div className="flex items-start space-x-3 p-3 bg-white rounded-xl">
+                        <div className="p-2 rounded-full bg-yellow-100">
+                          <Clock className="w-5 h-5 text-yellow-600" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-medium text-gray-900">{manager.name}</p>
+                              <p className="text-sm text-gray-600">Pending</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
             )}
 
             {/* Regular Approval Workflow */}
             <div className="space-y-3">
               {expense.approvalActions
-                .filter(action => action.stepIndex >= 0)
-                .map((action, index) => (
+                ?.filter(action => action.stepIndex >= 0)
+                .map((action) => (
                   <div key={action.id} className="flex items-start space-x-3 p-3 rounded-xl" style={{ backgroundColor: '#f5f3f4' }}>
                     <div className={`p-2 rounded-full ${
                       action.status === 'APPROVED' ? 'bg-green-100' :
