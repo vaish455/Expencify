@@ -10,21 +10,25 @@ const ManagerDashboard = () => {
   const { user } = useAuthStore();
   const [myExpenses, setMyExpenses] = useState([]);
   const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [teamInsights, setTeamInsights] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
     try {
-      const [expensesRes, approvalsRes] = await Promise.all([
+      const [expensesRes, approvalsRes, insightsRes] = await Promise.all([
         api.get(`/expenses/user/${user.id}`),
-        api.get('/approvals/pending')
+        api.get('/approvals/pending'),
+        api.get('/approvals/team-insights').catch(() => ({ data: { insights: null } }))
       ]);
       setMyExpenses(expensesRes.data.expenses.slice(0, 5));
       setPendingApprovals(approvalsRes.data.expenses.slice(0, 5));
-    } catch (error) {
+      setTeamInsights(insightsRes.data.insights);
+    } catch {
       toast.error('Failed to load dashboard data');
     } finally {
       setLoading(false);
@@ -74,7 +78,45 @@ const ManagerDashboard = () => {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Team Analytics Header (Only if they manage people) */}
+      {teamInsights && teamInsights.teamSize > 0 && (
+        <div className="card-premium p-6 mt-8 bg-gradient-to-br from-indigo-900 to-slate-900 border-none text-white relative overflow-hidden">
+          {/* Decorative background elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/4"></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h2 className="text-xl font-bold tracking-tight mb-1">Team Overview</h2>
+              <p className="text-indigo-200 text-sm">You manage {teamInsights.teamSize} direct reports</p>
+            </div>
+            
+            <div className="flex flex-wrap gap-4 md:gap-8">
+              <div>
+                <p className="text-xs text-indigo-300 uppercase tracking-widest font-semibold mb-1">Total Team Spends</p>
+                <p className="text-2xl font-bold font-mono tracking-tight">{formatCurrency(teamInsights.totalApprovedAmount, user?.company?.currency)}</p>
+              </div>
+              <div className="w-px bg-white/10 hidden md:block"></div>
+              <div>
+                <p className="text-xs text-indigo-300 uppercase tracking-widest font-semibold mb-1">Total Expenses</p>
+                <div className="flex items-center gap-4 text-sm font-medium">
+                  <span className="flex items-center gap-1.5" title="Pending">
+                    <div className="w-2 h-2 rounded-full bg-amber-400"></div> {teamInsights.pendingExpenses}
+                  </span>
+                  <span className="flex items-center gap-1.5" title="Approved">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400"></div> {teamInsights.approvedExpenses}
+                  </span>
+                  <span className="flex items-center gap-1.5" title="Rejected">
+                    <div className="w-2 h-2 rounded-full bg-rose-400"></div> {teamInsights.rejectedExpenses}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         {/* Pending Approvals Section */}
         <div className="card-premium flex flex-col">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-amber-50/50 rounded-t-xl">

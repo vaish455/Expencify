@@ -12,6 +12,7 @@ const ExpenseDetails = () => {
   const navigate = useNavigate();
   const [expense, setExpense] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
     fetchExpenseDetails();
@@ -171,7 +172,13 @@ const ExpenseDetails = () => {
                     className="w-full h-auto object-cover opacity-90 transition-opacity group-hover:opacity-100"
                   />
                   <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 bg-white shadow-lg text-slate-900 font-semibold px-4 py-2 rounded-lg text-sm transition-all transform scale-95 group-hover:scale-100">View Full Size</span>
+                    <button 
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); setIsLightboxOpen(true); }}
+                      className="opacity-0 group-hover:opacity-100 bg-white shadow-lg text-slate-900 font-semibold px-4 py-2 rounded-lg text-sm transition-all transform scale-95 group-hover:scale-100"
+                    >
+                      View Full Size
+                    </button>
                   </div>
                 </a>
               </div>
@@ -273,6 +280,35 @@ const ExpenseDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Receipt Lightbox Modal */}
+      {isLightboxOpen && expense.receiptUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm cursor-pointer" 
+            onClick={() => setIsLightboxOpen(false)}
+          ></div>
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl max-h-[90vh] w-full flex flex-col animate-slide-up overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50 shrink-0">
+              <h3 className="font-semibold text-slate-900">Receipt Viewer</h3>
+              <button 
+                onClick={() => setIsLightboxOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+                title="Close Viewer"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto flex-1 flex justify-center bg-slate-100/50">
+              <img 
+                src={expense.receiptUrl} 
+                alt="Full Receipt" 
+                className="max-w-full h-auto object-contain rounded-lg shadow-sm"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

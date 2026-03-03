@@ -251,6 +251,57 @@ class ApprovalController {
   }
 
   // ========================
+  // Team Insights
+  // ========================
+
+  async getTeamInsights(req, res, next) {
+    try {
+      // Find all users where managerId is the current user
+      const teamMembers = await prisma.user.findMany({
+        where: { managerId: req.user.id }
+      });
+
+      const teamMemberIds = teamMembers.map(m => m.id);
+
+      if (teamMemberIds.length === 0) {
+        return res.json({ insights: null });
+      }
+
+      // Aggregate expenses for the team
+      const [
+        totalExpenses,
+        pendingExpenses,
+        approvedExpenses,
+        rejectedExpenses,
+        totalAmount
+      ] = await Promise.all([
+        prisma.expense.count({ where: { userId: { in: teamMemberIds } } }),
+        prisma.expense.count({ where: { userId: { in: teamMemberIds }, status: 'PENDING' } }),
+        prisma.expense.count({ where: { userId: { in: teamMemberIds }, status: 'APPROVED' } }),
+        prisma.expense.count({ where: { userId: { in: teamMemberIds }, status: 'REJECTED' } }),
+        prisma.expense.aggregate({
+          where: { userId: { in: teamMemberIds }, status: 'APPROVED' },
+          _sum: { amountInCompanyCurrency: true }
+        })
+      ]);
+
+      res.json({
+        insights: {
+          teamSize: teamMemberIds.length,
+          totalExpenses,
+          pendingExpenses,
+          approvedExpenses,
+          rejectedExpenses,
+          totalApprovedAmount: totalAmount._sum.amountInCompanyCurrency || 0
+        }
+      });
+    } catch (error) {
+      console.error('Get Team Insights Error:', error);
+      next(error);
+    }
+  }
+
+  // ========================
   // Process Approval
   // ========================
 

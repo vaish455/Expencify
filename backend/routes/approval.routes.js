@@ -20,6 +20,8 @@ router.delete('/rules/:id', authorize('ADMIN'), ApprovalController.deleteApprova
 
 router.get('/pending', isAdminOrManager, ApprovalController.getPendingApprovals);
 
+router.get('/team-insights', isAdminOrManager, ApprovalController.getTeamInsights);
+
 router.post('/process/:expenseId', isAdminOrManager, [
   body('status').isIn(['APPROVED', 'REJECTED']),
 ], ApprovalController.processApproval);

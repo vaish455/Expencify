@@ -17,6 +17,7 @@ import ExecutiveDashboard from './pages/executive/Dashboard';
 import UserManagement from './pages/admin/UserManagement';
 import ApprovalRules from './pages/admin/ApprovalRules';
 import Categories from './pages/admin/Categories';
+import CompanySettings from './pages/admin/CompanySettings';
 
 // Employee Pages
 import SubmitExpense from './pages/employee/SubmitExpense';
@@ -60,6 +61,7 @@ function App() {
           <Route path="users" element={<ProtectedRoute role="ADMIN"><UserManagement /></ProtectedRoute>} />
           <Route path="approval-rules" element={<ProtectedRoute role="ADMIN"><ApprovalRules /></ProtectedRoute>} />
           <Route path="categories" element={<ProtectedRoute role="ADMIN"><Categories /></ProtectedRoute>} />
+          <Route path="company-settings" element={<ProtectedRoute role="ADMIN"><CompanySettings /></ProtectedRoute>} />
 
           {/* Employee Routes */}
           <Route path="submit-expense" element={<SubmitExpense />} />

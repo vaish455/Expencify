@@ -1,7 +1,7 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { getRoleName } from '../utils/role';
-import { Home, Users, FileText, Settings, LogOut, PlusCircle, CheckSquare, DollarSign, User, Bell, ChevronRight, Menu, Wallet } from 'lucide-react';
+import { Home, Users, FileText, Settings, LogOut, PlusCircle, CheckSquare, DollarSign, User, Bell, ChevronRight, Menu, Wallet, Building2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const Layout = () => {
@@ -25,6 +25,7 @@ const Layout = () => {
     ADMIN: [
       { to: '/', icon: Home, label: 'Dashboard' },
       { to: '/users', icon: Users, label: 'Users' },
+      { to: '/company-settings', icon: Building2, label: 'Company Settings' },
       { to: '/categories', icon: Settings, label: 'Categories' },
       { to: '/approval-rules', icon: CheckSquare, label: 'Approval Rules' },
       { to: '/pending-approvals', icon: FileText, label: 'All Expenses' },

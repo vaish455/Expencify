@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
-import { Check, X, FileText, ArrowRight } from 'lucide-react';
+import { Check, X, FileText, ArrowRight, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuthStore } from '../../store/authStore';
 import { formatCurrency, getCurrencySymbol } from '../../utils/currencyUtils';
@@ -56,6 +56,53 @@ const PendingApprovals = () => {
     setShowModal(true);
   };
 
+  const handleExportCSV = () => {
+    if (expenses.length === 0) {
+      toast.error('No data to export');
+      return;
+    }
+
+    try {
+      // 1. Prepare CSV headers
+      const headers = ['ID', 'Date', 'Employee', 'Email', 'Description', 'Category', 'Amount', 'Currency', 'Amount (Company Currency)', 'Status'];
+      
+      // 2. Map data to rows
+      const rows = expenses.map(expense => [
+        expense.id,
+        format(new Date(expense.createdAt), 'yyyy-MM-dd HH:mm:ss'),
+        `"${expense.user.name}"`, // Quote strings that might contain commas
+        expense.user.email,
+        `"${expense.description.replace(/"/g, '""')}"`, // Handle quotes in description
+        `"${expense.category.name}"`,
+        expense.amount,
+        expense.currency,
+        expense.amountInCompanyCurrency,
+        expense.status
+      ]);
+
+      // 3. Combine headers and rows
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+      ].join('\n');
+
+      // 4. Create Blob and download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `pending_approvals_${format(new Date(), 'yyyyMMdd_HHmm')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Export started');
+    } catch (error) {
+      console.error('Export Error:', error);
+      toast.error('Failed to generate CSV');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -68,10 +115,19 @@ const PendingApprovals = () => {
     <>
       <div className="space-y-6 animate-slide-up">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Pending Approvals</h1>
-          <p className="text-sm text-slate-500 mt-1">Review team submissions pending your action.</p>
-        </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Pending Approvals</h1>
+            <p className="text-sm text-slate-500 mt-1">Review team submissions pending your action.</p>
+          </div>
+          {expenses.length > 0 && (
+            <button 
+              onClick={handleExportCSV}
+              className="btn-secondary"
+            >
+              <Download className="w-4 h-4 mr-2 text-slate-500" />
+              Export to CSV
+            </button>
+          )}
       </div>
 
       <div className="card-premium overflow-hidden">
