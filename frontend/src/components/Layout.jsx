@@ -1,5 +1,6 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { getRoleName } from '../utils/role';
 import { Home, Users, FileText, Settings, LogOut, PlusCircle, CheckSquare, DollarSign, User } from 'lucide-react';
 import { useState } from 'react';
 
@@ -58,7 +59,8 @@ const Layout = () => {
     ],
   };
 
-  const currentNavItems = navItems[user?.role] || [];
+  const roleName = getRoleName(user?.role);
+  const currentNavItems = navItems[roleName?.toUpperCase()] || [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -84,7 +86,7 @@ const Layout = () => {
               >
                 <div className="text-right">
                   <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
-                  <p className="text-xs" style={{ color: '#5a3a52' }}>{user?.role}</p>
+                  <p className="text-xs" style={{ color: '#5a3a52' }}>{roleName || 'Unknown'}</p>
                 </div>
                 <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #5a3a52 0%, #875A7B 100%)' }}>
                   <User className="w-5 h-5 text-white" />

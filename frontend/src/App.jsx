@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './store/authStore';
+import { getRoleName } from './utils/role';
 
 // Auth Pages
 import Login from './pages/auth/Login';
@@ -31,9 +32,11 @@ import Profile from './pages/shared/Profile';
 // Layout
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const { user } = useAuthStore();
+  const roleName = getRoleName(user?.role);
 
   return (
     <Router future={{
@@ -45,11 +48,11 @@ function App() {
         <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
         <Route path="/signup" element={user ? <Navigate to="/" /> : <Signup />} />
 
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+        <Route path="/" element={<ProtectedRoute><ErrorBoundary><Layout /></ErrorBoundary></ProtectedRoute>}>
           <Route index element={
-            user?.role === 'ADMIN' ? <AdminDashboard /> :
-            user?.role === 'MANAGER' ? <ManagerDashboard /> :
-            ['CEO', 'CFO', 'CTO', 'DIRECTOR'].includes(user?.role) ? <ExecutiveDashboard /> :
+            roleName === 'ADMIN' ? <AdminDashboard /> :
+            roleName === 'MANAGER' ? <ManagerDashboard /> :
+            ['CEO', 'CFO', 'CTO', 'DIRECTOR'].includes(roleName) ? <ExecutiveDashboard /> :
             <EmployeeDashboard />
           } />
 

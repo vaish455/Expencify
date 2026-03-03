@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { getRoleName } from '../utils/role';
 
 const ProtectedRoute = ({ children, role }) => {
   const { user } = useAuthStore();
@@ -10,7 +11,8 @@ const ProtectedRoute = ({ children, role }) => {
 
   if (role) {
     const allowedRoles = Array.isArray(role) ? role : [role];
-    if (!allowedRoles.includes(user.role)) {
+    const userRoleName = getRoleName(user.role);
+    if (!allowedRoles.includes(userRoleName)) {
       return <Navigate to="/" />;
     }
   }
