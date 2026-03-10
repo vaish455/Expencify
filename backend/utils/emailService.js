@@ -14,186 +14,264 @@ class EmailService {
     });
   }
 
+  getBaseTemplate(title, content) {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8fafc; padding: 40px 20px;">
+          <tr>
+            <td align="center">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025); border: 1px solid #e2e8f0;">
+                <!-- Header -->
+                <tr>
+                  <td style="background-color: #4338ca; padding: 40px 20px; text-align: center;">
+                    <h2 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.025em;">${title}</h2>
+                  </td>
+                </tr>
+                <!-- Body -->
+                <tr>
+                  <td style="padding: 40px 30px;">
+                    ${content}
+                    
+                    <!-- Footer -->
+                    <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #e2e8f0; text-align: center;">
+                      <p style="color: #475569; font-size: 14px; margin: 0; line-height: 1.5;">Best regards,</p>
+                      <p style="color: #0f172a; font-size: 15px; font-weight: 600; margin: 4px 0 0 0;">The Expencify Team</p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              <!-- Outer Footer -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px;">
+                <tr>
+                  <td style="padding: 24px 20px; text-align: center; color: #94a3b8; font-size: 13px;">
+                    <p style="margin: 0;">&copy; ${new Date().getFullYear()} Expencify. All rights reserved.</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+    `;
+  }
+
+  getButtonHtml(url, text) {
+    return `
+      <div style="margin: 32px 0; text-align: center;">
+        <a href="${url}" 
+           style="background-color: #4338ca; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-flex; font-weight: 500; font-size: 14px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);">
+          ${text}
+        </a>
+      </div>
+    `;
+  }
+  
+  getInfoCardHtml(title, items, borderColor = '#4338ca', bgColor = '#f8fafc') {
+    const itemsHtml = Object.entries(items)
+      .map(([key, value]) => `<p style="margin: 8px 0; color: #475569; font-size: 14px;"><strong style="color: #0f172a; min-width: 120px; display: inline-block; font-weight: 500;">${key}:</strong> ${value}</p>`)
+      .join('');
+      
+    return `
+      <div style="background-color: ${bgColor}; padding: 24px; border-radius: 12px; margin: 24px 0; border: 1px solid #e2e8f0; border-left: 4px solid ${borderColor};">
+        ${title ? `<h3 style="margin-top: 0; margin-bottom: 16px; color: ${borderColor}; font-size: 16px; font-weight: 600;">${title}</h3>` : ''}
+        ${itemsHtml}
+      </div>
+    `;
+  }
+
   async sendWelcomeEmail(user, company) {
+    const content = `
+      <p style="color: #0f172a; font-size: 16px; margin-top: 0;">Hi <strong>${user.name}</strong>,</p>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6;">Your account has been successfully created as an <strong style="color: #4338ca;">${user.role}</strong> in <strong style="color: #0f172a;">${company.name}</strong>.</p>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6;">You can now start managing your expenses efficiently and effortlessly.</p>
+      ${this.getButtonHtml(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`, 'Login to Your Account')}
+    `;
+
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'Welcome to Expencify!',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <div style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%); padding: 40px; text-align: center;">
-            <h2 style="color: #ffffff; margin: 0; font-size: 28px;">Welcome to Expencify!</h2>
-          </div>
-          <div style="padding: 40px;">
-            <p style="color: #333333; font-size: 16px;">Hi ${user.name},</p>
-            <p style="color: #8F8F8F; font-size: 14px; line-height: 1.6;">Your account has been successfully created as an <strong style="color: #714B67;">${user.role}</strong> in <strong style="color: #714B67;">${company.name}</strong>.</p>
-            <p style="color: #8F8F8F; font-size: 14px; line-height: 1.6;">You can now start managing your expenses efficiently.</p>
-            <div style="margin: 30px 0; text-align: center;">
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" 
-                 style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600;">
-                Login to Your Account
-              </a>
-            </div>
-            <p style="color: #8F8F8F; font-size: 14px;">Best regards,<br><strong style="color: #714B67;">The Expencify Team</strong></p>
-          </div>
-        </div>
-      `,
+      html: this.getBaseTemplate('Welcome to Expencify!', content),
     };
 
     await this.transporter.sendMail(mailOptions);
   }
 
   async sendUserCreatedEmail(user, password, company, createdBy) {
+    const content = `
+      <p style="color: #0f172a; font-size: 16px; margin-top: 0;">Hi <strong>${user.name}</strong>,</p>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6;"><strong>${createdBy.name}</strong> has created an account for you in <strong style="color: #0f172a;">${company.name}</strong>.</p>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6;">Your assigned role is: <strong style="color: #4338ca;">${user.role}</strong></p>
+      
+      <div style="background-color: #f8fafc; padding: 24px; border-radius: 8px; margin: 28px 0; border: 1px solid #e2e8f0;">
+        <h3 style="margin-top: 0; color: #0f172a; font-size: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px; font-weight: 600;">Login Credentials</h3>
+        <p style="margin: 12px 0; color: #475569; font-size: 14px;"><strong>Email:</strong> ${user.email}</p>
+        <p style="margin: 12px 0; color: #475569; font-size: 14px;"><strong>Temporary Password:</strong> <code style="background-color: #e2e8f0; padding: 6px 12px; border-radius: 6px; color: #0f172a; font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 14px;">${password}</code></p>
+      </div>
+
+      <div style="background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 6px; margin-bottom: 24px; color: #991b1b; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+        <p style="font-size: 14px; margin: 0; line-height: 1.5; font-weight: 500;"><strong>⚠️ Important Security Notice:</strong> Please change your password immediately after your first login to ensure your account remains secure.</p>
+      </div>
+      
+      ${this.getButtonHtml(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`, 'Login Now')}
+    `;
+
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'Your Expencify Account Has Been Created',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <div style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%); padding: 40px; text-align: center;">
-            <h2 style="color: #ffffff; margin: 0; font-size: 28px;">Your Expencify Account is Ready!</h2>
-          </div>
-          <div style="padding: 40px;">
-            <p style="color: #333333; font-size: 16px;">Hi ${user.name},</p>
-            <p style="color: #8F8F8F; font-size: 14px; line-height: 1.6;">${createdBy.name} has created an account for you in <strong style="color: #714B67;">${company.name}</strong>.</p>
-            <p style="color: #8F8F8F; font-size: 14px;">Your role: <strong style="color: #017E84;">${user.role}</strong></p>
-            
-            <div style="background-color: #F8F8F8; padding: 24px; border-radius: 8px; margin: 24px 0; border-left: 4px solid #017E84;">
-              <h3 style="margin-top: 0; color: #714B67; font-size: 18px;">Login Credentials</h3>
-              <p style="margin: 8px 0; color: #333333;"><strong>Email:</strong> ${user.email}</p>
-              <p style="margin: 8px 0; color: #333333;"><strong>Temporary Password:</strong> <code style="background-color: #E5E5E5; padding: 6px 12px; border-radius: 4px; color: #017E84; font-weight: 600;">${password}</code></p>
-            </div>
-
-            <p style="color: #ef4444; font-size: 14px; background-color: #FEE2E2; padding: 12px; border-radius: 6px;"><strong>⚠️ Important:</strong> Please change your password after your first login for security reasons.</p>
-            
-            <div style="margin: 30px 0; text-align: center;">
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" 
-                 style="background: linear-gradient(135deg, #714B67 0%, #017E84 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600;">
-                Login Now
-              </a>
-            </div>
-            
-            <p style="color: #8F8F8F; font-size: 14px;">Best regards,<br><strong style="color: #714B67;">The Expencify Team</strong></p>
-          </div>
-        </div>
-      `,
+      html: this.getBaseTemplate('Your Expencify Account is Ready!', content),
     };
 
     await this.transporter.sendMail(mailOptions);
   }
 
   async sendLoginNotification(user) {
+    const content = `
+      <p style="color: #0f172a; font-size: 16px; margin-top: 0;">Hi <strong>${user.name}</strong>,</p>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6;">We detected a new login to your account on <strong>${new Date().toLocaleString()}</strong>.</p>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6;">If this was you, no further action is required.</p>
+      
+      <div style="background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 6px; margin-top: 24px; color: #991b1b; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+        <p style="font-size: 14px; margin: 0; line-height: 1.5;"><strong>Not you?</strong> Please <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" style="color: #991b1b; font-weight: 600; text-decoration: underline;">reset your password</a> or contact your administrator immediately to secure your account.</p>
+      </div>
+    `;
+
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: user.email,
-      subject: 'New Login Detected',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #714B67;">New Login Detected</h2>
-          <p>Hi ${user.name},</p>
-          <p>We detected a new login to your account at ${new Date().toLocaleString()}.</p>
-          <p>If this wasn't you, please contact your administrator immediately.</p>
-          <p>Best regards,<br>The Expencify Team</p>
-        </div>
-      `,
+      subject: 'Security Alert: New Login Detected',
+      html: this.getBaseTemplate('New Login Detected', content),
     };
 
     await this.transporter.sendMail(mailOptions);
   }
 
   async sendPasswordChangeNotification(user) {
+    const content = `
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="background-color: #d1fae5; color: #10b981; width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(16,185,129,0.1);">
+          ✓
+        </div>
+      </div>
+      <p style="color: #0f172a; font-size: 16px; margin-top: 0; text-align: center;">Hi <strong>${user.name}</strong>,</p>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6; text-align: center;">Your password was successfully changed on <strong>${new Date().toLocaleString()}</strong>.</p>
+      
+      <div style="background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 16px; border-radius: 6px; margin-top: 32px; color: #991b1b; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+        <p style="font-size: 14px; margin: 0; line-height: 1.5;"><strong>Didn't make this change?</strong> Please contact your administrator immediately to secure your account.</p>
+      </div>
+    `;
+
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: user.email,
-      subject: 'Password Changed Successfully',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #714B67;">Password Changed</h2>
-          <p>Hi ${user.name},</p>
-          <p>Your password has been changed successfully at ${new Date().toLocaleString()}.</p>
-          <p>If you didn't make this change, please contact your administrator immediately.</p>
-          <p>Best regards,<br>The Expencify Team</p>
-        </div>
-      `,
+      subject: 'Security Alert: Password Changed Successfully',
+      html: this.getBaseTemplate('Password Changed', content),
     };
 
     await this.transporter.sendMail(mailOptions);
   }
 
   async sendExpenseSubmittedEmail(user, expense, company) {
+    const details = {
+      'Amount': `${expense.originalCurrency} ${expense.originalAmount.toFixed(2)}`,
+      'Category': expense.category?.name || 'N/A',
+      'Date': new Date(expense.date).toLocaleDateString(),
+      'Description': expense.description
+    };
+
+    const content = `
+      <p style="color: #0f172a; font-size: 16px; margin-top: 0;">Hi <strong>${user.name}</strong>,</p>
+      <p style="color: #475569; font-size: 15px; line-height: 1.6;">Your expense has been submitted successfully and is currently <strong style="color: #f59e0b;">pending approval</strong>.</p>
+      
+      ${this.getInfoCardHtml('Expense Summary', details, '#f59e0b', '#fef3c7')}
+
+      <p style="color: #475569; font-size: 15px; line-height: 1.6;">You will be notified via email once your expense is reviewed by an approver.</p>
+      ${this.getButtonHtml(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/my-expenses`, 'View Expense Details')}
+    `;
+
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: user.email,
       subject: 'Expense Submitted Successfully',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #714B67;">Expense Submitted</h2>
-          <p>Hi ${user.name},</p>
-          <p>Your expense has been submitted successfully and is pending approval.</p>
-          
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 5px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>Amount:</strong> ${expense.originalAmount} ${expense.originalCurrency}</p>
-            <p style="margin: 5px 0;"><strong>Category:</strong> ${expense.category?.name || 'N/A'}</p>
-            <p style="margin: 5px 0;"><strong>Description:</strong> ${expense.description}</p>
-            <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(expense.date).toLocaleDateString()}</p>
-          </div>
-
-          <p>You will be notified once your expense is reviewed.</p>
-          <p>Best regards,<br>The Expencify Team</p>
-        </div>
-      `,
+      html: this.getBaseTemplate('Expense Submitted', content),
     };
 
     await this.transporter.sendMail(mailOptions);
   }
 
   async sendExpenseApprovedEmail(user, expense, approvedBy) {
+    const details = {
+      'Amount': `${expense.originalCurrency} ${expense.originalAmount.toFixed(2)}`,
+      'Category': expense.category?.name || 'N/A',
+      'Approved By': approvedBy.name,
+      'Description': expense.description
+    };
+
+    const content = `
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="background-color: #d1fae5; color: #10b981; width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(16,185,129,0.1);">
+          ✓
+        </div>
+      </div>
+      <p style="color: #0f172a; font-size: 16px; margin-top: 0; text-align: center;">Hi <strong>${user.name}</strong>,</p>
+      <p style="color: #10b981; font-size: 18px; font-weight: 600; line-height: 1.6; text-align: center;">Great news! Your expense has been approved.</p>
+      
+      ${this.getInfoCardHtml('Approved Expense Details', details, '#10b981', '#f8fafc')}
+      
+      ${this.getButtonHtml(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/my-expenses`, 'View Expense')}
+    `;
+
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: user.email,
-      subject: 'Expense Approved',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #10b981;">Expense Approved ✓</h2>
-          <p>Hi ${user.name},</p>
-          <p>Great news! Your expense has been approved by ${approvedBy.name}.</p>
-          
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 5px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>Amount:</strong> ${expense.originalAmount} ${expense.originalCurrency}</p>
-            <p style="margin: 5px 0;"><strong>Category:</strong> ${expense.category?.name || 'N/A'}</p>
-            <p style="margin: 5px 0;"><strong>Description:</strong> ${expense.description}</p>
-          </div>
-
-          <p>Best regards,<br>The Expencify Team</p>
-        </div>
-      `,
+      subject: 'Expense Approved: ' + (expense.category?.name || 'Expense Request'),
+      html: this.getBaseTemplate('Expense Approved', content),
     };
 
     await this.transporter.sendMail(mailOptions);
   }
 
   async sendExpenseRejectedEmail(user, expense, rejectedBy, reason) {
+    const details = {
+      'Amount': `${expense.originalCurrency} ${expense.originalAmount.toFixed(2)}`,
+      'Category': expense.category?.name || 'N/A',
+      'Reviewed By': rejectedBy.name,
+      'Description': expense.description
+    };
+    
+    if (reason) {
+      details['Rejection Reason'] = `<strong style="color: #ef4444;">${reason}</strong>`;
+    }
+
+    const content = `
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="background-color: #fee2e2; color: #ef4444; width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(239,68,68,0.1);">
+          ✗
+        </div>
+      </div>
+      <p style="color: #0f172a; font-size: 16px; margin-top: 0; text-align: center;">Hi <strong>${user.name}</strong>,</p>
+      <p style="color: #ef4444; font-size: 16px; font-weight: 600; line-height: 1.6; text-align: center;">Your expense request was rejected.</p>
+      
+      ${this.getInfoCardHtml('Rejected Expense Details', details, '#ef4444', '#f8fafc')}
+
+      <p style="color: #475569; font-size: 14px; line-height: 1.6; text-align: center;">Please review the notes and resubmit your expense request if applicable.</p>
+      
+      ${this.getButtonHtml(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/my-expenses`, 'Review Expense')}
+    `;
+
     const mailOptions = {
       from: process.env.SMTP_FROM,
       to: user.email,
-      subject: 'Expense Rejected',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #ef4444;">Expense Rejected</h2>
-          <p>Hi ${user.name},</p>
-          <p>Your expense has been rejected by ${rejectedBy.name}.</p>
-          
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 5px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>Amount:</strong> ${expense.originalAmount} ${expense.originalCurrency}</p>
-            <p style="margin: 5px 0;"><strong>Category:</strong> ${expense.category?.name || 'N/A'}</p>
-            <p style="margin: 5px 0;"><strong>Description:</strong> ${expense.description}</p>
-            ${reason ? `<p style="margin: 5px 0;"><strong>Reason:</strong> ${reason}</p>` : ''}
-          </div>
-
-          <p>Please review and resubmit if necessary.</p>
-          <p>Best regards,<br>The Expencify Team</p>
-        </div>
-      `,
+      subject: 'Expense Rejected: ' + (expense.category?.name || 'Expense Request'),
+      html: this.getBaseTemplate('Expense Rejected', content),
     };
 
     await this.transporter.sendMail(mailOptions);
